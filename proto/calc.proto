@@ -2,18 +2,29 @@ syntax = "proto3";
 package proto;
 option go_package = "https://github.com/bulbosaur/calculator-with-authorization/proto";
 
-service AgentService{
-    
+message Task{
+    int id = 1
+    string expression = 2
+    double arg1 = 3
+    double arg2 = 4
+    int32 prev_task_id1 = 5
+    int32 prev_task_id2 = 6
+    string operation = 7
+    string status = 8
+    double result = 9
 }
 
-service OrchestratorService {
-  rpc RegExpression (RegisterExpressionRequest) returns (RegisterExpressionResponse);
+message SubmitTaskResultRequest {
+  int32 task_id = 1;
+  double result = 2;
+  string error_message = 3;
 }
 
-message RegisterExpressionRequest {
-  string expression = 1;
+message SubmitTaskResultResponse {
+  bool success = 1;
 }
 
-message RegisterExpressionResponse {
-  int32 id = 1;
+service TaskService {
+  rpc GetTask (GetTaskRequest) returns (Task);
+  rpc SubmitTaskResult (SubmitTaskResultRequest) returns (SubmitTaskResultResponse);
 }

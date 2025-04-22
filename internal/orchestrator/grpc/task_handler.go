@@ -1,58 +1,58 @@
 package orchestrator
 
 import (
-	"encoding/json"
+	"context"
 	"log"
-	"net/http"
 
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
+	"github.com/bulbosaur/calculator-with-authorization/proto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-func taskHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			var task *models.Task
+type TaskServer struct {
+	proto.UnimplementedTaskServiceServer
+	exprRepo *repository.ExpressionModel
+}
 
-			task, id, err := exprRepo.GetTask()
-			if err != nil {
-				log.Println("Failed to get task:", err)
-				http.Error(w, "Failed to get task", http.StatusInternalServerError)
-				return
-			}
-
-			if task == nil {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
-
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{"task": task})
-
-			exprRepo.UpdateTaskStatus(id, models.StatusCalculate)
-
-		case http.MethodPost:
-			var req struct {
-				ID           int     `json:"id"`
-				Result       float64 `json:"result"`
-				ErrorMessage string  `json:"error_message"`
-			}
-			err := json.NewDecoder(r.Body).Decode(&req)
-			if err != nil {
-				http.Error(w, "Invalid request body", http.StatusUnprocessableEntity)
-				return
-			}
-
-			err = exprRepo.UpdateTaskResult(req.ID, req.Result, req.ErrorMessage)
-			if err != nil {
-				log.Print("error updating task result:", err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-
-		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
+func NewTaskServer(repo *repository.ExpressionModel) *TaskServer {
+	return &TaskServer{exprRepo: repo}
+}
+func (ts *TaskServer) GetTask(ctx context.Context, req *proto.GetTaskRequest) (*proto.Task, error) {
+	task, id, err := ts.exprRepo.GetTask()
+	if err != nil {
+		log.Println("Failed to get task:", err)
+		return nil, status.Errorf(codes.Internal, "failed to get task: %v", err)
 	}
+
+	if task == nil {
+		return nil, status.Error(codes.NotFound, "no tasks available")
+	}
+
+	ts.exprRepo.UpdateTaskStatus(id, models.StatusCalculate)
+
+	return &proto.Task{
+		Id:           int32(task.ID),
+		Arg1:         task.Arg1,
+		Arg2:         task.Arg2,
+		Operation:    task.Operation,
+		PrevTaskId_1: int32(task.PrevTaskID1),
+		PrevTaskId_2: int32(task.PrevTaskID2),
+	}, nil
+}
+
+func (s *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTaskResultRequest) (*proto.SubmitTaskResultResponse, error) {
+	err := s.exprRepo.UpdateTaskResult(
+		int(req.TaskId),
+		req.Result,
+		req.ErrorMessage,
+	)
+	if err != nil {
+		log.Printf("Failed to update task result: %v", err)
+		return &proto.SubmitTaskResultResponse{Success: false},
+			status.Errorf(codes.Internal, "failed to update task result: %v", err)
+	}
+
+	return &proto.SubmitTaskResultResponse{Success: true}, nil
 }
