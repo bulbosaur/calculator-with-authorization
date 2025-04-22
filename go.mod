@@ -1,4 +1,4 @@
-module github.com/bulbosaur/web-calculator-golang
+module github.com/bulbosaur/calculator-with-authorization
 
 go 1.23
 

@@ -8,12 +8,17 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/proto"
 	"github.com/spf13/viper"
 )
 
 // Workers - переменная, в которой хранится количество одновременно работающих воркеров
 var Workers int
+
+type GRPCAgent struct {
+	client proto.AgentServiceClient
+}
 
 // RunAgent запускает агента
 func RunAgent() {

@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
-	orchestrator "github.com/bulbosaur/web-calculator-golang/internal/orchestrator/service"
-	"github.com/bulbosaur/web-calculator-golang/internal/repository"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
+	orchestrator "github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/service"
+	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 )
 
 func regHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {

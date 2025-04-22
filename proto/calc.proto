@@ -1,0 +1,19 @@
+syntax = "proto3";
+package proto;
+option go_package = "https://github.com/bulbosaur/calculator-with-authorization/proto";
+
+service AgentService{
+    
+}
+
+service OrchestratorService {
+  rpc RegExpression (RegisterExpressionRequest) returns (RegisterExpressionResponse);
+}
+
+message RegisterExpressionRequest {
+  string expression = 1;
+}
+
+message RegisterExpressionResponse {
+  int32 id = 1;
+}

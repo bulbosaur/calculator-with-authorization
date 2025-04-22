@@ -1,8 +1,8 @@
 package orchestrator
 
 import (
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
-	"github.com/bulbosaur/web-calculator-golang/internal/repository"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 )
 
 // Calc вызывает токенизацию выражения, записывает его в RPN. а затем в параллельных горутинах подсчитывает значения выражений в скобках

@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/spf13/viper"
 )
 

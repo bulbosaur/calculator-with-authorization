@@ -3,7 +3,7 @@ package orchestrator
 import (
 	"testing"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 )
 
 func tokensEqual(a, b []models.Token) bool {

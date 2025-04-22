@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/bulbosaur/web-calculator-golang/config"
-	agent "github.com/bulbosaur/web-calculator-golang/internal/agent/service"
+	"github.com/bulbosaur/calculator-with-authorization/config"
+	agent "github.com/bulbosaur/calculator-with-authorization/internal/agent/service"
 )
 
 func main() {

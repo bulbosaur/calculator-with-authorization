@@ -3,7 +3,7 @@ package orchestrator
 import (
 	"unicode"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 )
 
 func newToken(value string, isNumber bool) *models.Token {

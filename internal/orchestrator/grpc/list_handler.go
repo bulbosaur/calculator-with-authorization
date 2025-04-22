@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
-	"github.com/bulbosaur/web-calculator-golang/internal/repository"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 )
 
 func listHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {

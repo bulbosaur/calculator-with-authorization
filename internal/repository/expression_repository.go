@@ -6,7 +6,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 )
 
 // ExpressionModel обертывает пул подключения sql.DB

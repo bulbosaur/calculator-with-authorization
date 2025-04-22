@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/repository"
+	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 )

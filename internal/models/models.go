@@ -26,7 +26,7 @@ type Expression struct {
 	Expression   string  `json:"expression"`
 	Status       string  `json:"status"`
 	Result       float64 `json:"result"`
-	ErrorMessage string  `json:"error_message`
+	ErrorMessage string  `json:"error_message"`
 }
 
 // RegisteredExpression - структура ответа, возвращаемого при регистрации выражения в оркестраторе

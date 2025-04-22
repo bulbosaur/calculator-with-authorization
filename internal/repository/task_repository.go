@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 )
 
 // InsertTask записывает мат выражение в таблицу БД

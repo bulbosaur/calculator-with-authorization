@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
-	"github.com/bulbosaur/web-calculator-golang/internal/repository"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 	"github.com/gorilla/mux"
 )
 
-func resultHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
+func taskResultHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"]
@@ -18,13 +18,13 @@ func resultHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(models.ErrorResponse{
-				Error:        "Invalid expression ID",
+				Error:        "Invalid task ID",
 				ErrorMessage: err.Error(),
 			})
 			return
 		}
 
-		expr, err := exprRepo.GetExpression(intID)
+		task, err := exprRepo.GetTaskByID(intID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(models.ErrorResponse{
@@ -35,8 +35,8 @@ func resultHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(models.Response{
-			Expression: *expr,
+		json.NewEncoder(w).Encode(models.TaskResponse{
+			Task: *task,
 		})
 	}
 }

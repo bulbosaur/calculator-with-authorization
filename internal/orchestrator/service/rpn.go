@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/bulbosaur/web-calculator-golang/internal/models"
-	"github.com/bulbosaur/web-calculator-golang/internal/repository"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
+	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 )
 
 func toReversePolishNotation(expression []models.Token) ([]models.Token, error) {
