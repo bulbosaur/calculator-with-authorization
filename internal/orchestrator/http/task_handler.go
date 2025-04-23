@@ -19,7 +19,13 @@ type TaskServer struct {
 func NewTaskServer(repo *repository.ExpressionModel) *TaskServer {
 	return &TaskServer{exprRepo: repo}
 }
-func (ts *TaskServer) GetTask(ctx context.Context, req *proto.GetTaskRequest) (*proto.Task, error) {
+
+func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest) (*proto.Task, error) {
+	// Проверка аутентификации
+	// if req.GetCtx() == nil || req.GetCtx().GetAuthToken() == "" {
+	//     return nil, status.Error(codes.Unauthenticated, "authentication required")
+	// }
+
 	task, id, err := ts.exprRepo.GetTask()
 	if err != nil {
 		log.Println("Failed to get task:", err)
@@ -34,11 +40,12 @@ func (ts *TaskServer) GetTask(ctx context.Context, req *proto.GetTaskRequest) (*
 
 	return &proto.Task{
 		Id:           int32(task.ID),
+		ExpressionID: int32(task.ExpressionID),
 		Arg1:         task.Arg1,
 		Arg2:         task.Arg2,
+		PrevTaskID1:  int32(task.PrevTaskID1),
+		PrevTaskID2:  int32(task.PrevTaskID2),
 		Operation:    task.Operation,
-		PrevTaskId_1: int32(task.PrevTaskID1),
-		PrevTaskId_2: int32(task.PrevTaskID2),
 	}, nil
 }
 
