@@ -22,9 +22,14 @@ func RunGRPCOrchestrator(exprRepo *repository.ExpressionModel) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.MaxRecvMsgSize(10*1024*1024),
+		grpc.MaxSendMsgSize(10*1024*1024),
+	)
+
 	proto.RegisterTaskServiceServer(s, NewTaskServer(exprRepo))
 
+	log.Print("Starting gRPC server...")
 	log.Printf("gRPC server listening on %s", addr)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

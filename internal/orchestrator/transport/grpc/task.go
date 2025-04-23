@@ -46,7 +46,21 @@ func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest
 		PrevTask_Id1: int32(task.PrevTaskID1),
 		PrevTask_Id2: int32(task.PrevTaskID2),
 		Operation:    task.Operation,
+		Status:       task.Status,
+		Result:       task.Result,
 	}, nil
+
+	// return &proto.Task{
+	// 	Id:           1,
+	// 	ExpressionId: 1,
+	// 	Arg1:         3,
+	// 	Arg2:         4,
+	// 	PrevTask_Id1: 0,
+	// 	PrevTask_Id2: 0,
+	// 	Operation:    "+",
+	// 	Status:       "pending",
+	// 	Result:       0,
+	// }, nil
 }
 
 func (s *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTaskResultRequest) (*proto.SubmitTaskResultResponse, error) {

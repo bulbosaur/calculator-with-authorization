@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/bulbosaur/calculator-with-authorization/config"
-	agent "github.com/bulbosaur/calculator-with-authorization/internal/agent/service"
+	agent "github.com/bulbosaur/calculator-with-authorization/internal/agent"
 )
 
 func main() {

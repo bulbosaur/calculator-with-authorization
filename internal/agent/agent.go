@@ -22,8 +22,8 @@ type GRPCAgent struct {
 }
 
 func newGRPCAgent() (*GRPCAgent, error) {
-	orchost := viper.GetString("server.ORC_HOST")
-	orcport := viper.GetString("server.ORC_PORT")
+	orchost := viper.GetString("server.GRPC_HOST")
+	orcport := viper.GetString("server.GRPC_PORT")
 	orchestratorAddr := fmt.Sprintf("%s:%s", orchost, orcport)
 
 	conn, err := grpc.NewClient(

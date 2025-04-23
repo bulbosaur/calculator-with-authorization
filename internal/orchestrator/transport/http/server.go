@@ -13,8 +13,8 @@ import (
 // RunOrchestrator запускает http сервер оркестратора
 func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 
-	host := viper.GetString("server.ORC_HOST")
-	port := viper.GetString("server.ORC_PORT")
+	host := viper.GetString("server.HTTP_HOST")
+	port := viper.GetString("server.HTTP_PORT")
 	addr := fmt.Sprintf("%s:%s", host, port)
 
 	router := mux.NewRouter()
@@ -25,10 +25,10 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 	router.HandleFunc("/api/v1/expressions/{id}", resultHandler(exprRepo)).Methods("GET")
 	router.HandleFunc("/coffee", CoffeeHandler)
 
-	log.Printf("Orchestrator starting on %s", addr)
+	log.Printf("HTTP orchestrator starting on %s", addr)
 	err := http.ListenAndServe(addr, router)
 
 	if err != nil {
-		log.Fatal("Orchestrator server error:", err)
+		log.Fatal("HTTP orchestrator server error:", err)
 	}
 }

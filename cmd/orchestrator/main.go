@@ -26,6 +26,6 @@ func main() {
 
 	defer db.Close()
 
-	orchestratorHTTP.RunHTTPOrchestrator(ExprRepo)
+	go orchestratorHTTP.RunHTTPOrchestrator(ExprRepo)
 	orchestratorGRPC.RunGRPCOrchestrator(ExprRepo)
 }
