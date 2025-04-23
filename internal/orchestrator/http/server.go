@@ -6,7 +6,9 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/grpc"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
+	"github.com/bulbosaur/calculator-with-authorization/proto"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -49,7 +51,7 @@ func runGRPCServer(exprRepo *repository.ExpressionModel) {
 	}
 
 	s := grpc.NewServer()
-	proto.RegisterTaskServiceServer(s, NewTaskServer(exprRepo))
+	proto.RegisterTaskServiceServer(s, grpc.NewTaskServer(exprRepo))
 
 	log.Printf("gRPC server listening on %s", addr)
 	if err := s.Serve(lis); err != nil {

@@ -24,11 +24,11 @@ const (
 type Task struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	ExpressionID  int32                  `protobuf:"varint,2,opt,name=expressionID,proto3" json:"expressionID,omitempty"`
+	ExpressionId  int32                  `protobuf:"varint,2,opt,name=expressionId,proto3" json:"expressionId,omitempty"`
 	Arg1          float64                `protobuf:"fixed64,3,opt,name=arg1,proto3" json:"arg1,omitempty"`
 	Arg2          float64                `protobuf:"fixed64,4,opt,name=arg2,proto3" json:"arg2,omitempty"`
-	PrevTask_ID1  int32                  `protobuf:"varint,5,opt,name=prev_task_ID1,json=prevTaskID1,proto3" json:"prev_task_ID1,omitempty"`
-	PrevTask_ID2  int32                  `protobuf:"varint,6,opt,name=prev_task_ID2,json=prevTaskID2,proto3" json:"prev_task_ID2,omitempty"`
+	PrevTask_Id1  int32                  `protobuf:"varint,5,opt,name=prev_task_Id1,json=prevTaskId1,proto3" json:"prev_task_Id1,omitempty"`
+	PrevTask_Id2  int32                  `protobuf:"varint,6,opt,name=prev_task_Id2,json=prevTaskId2,proto3" json:"prev_task_Id2,omitempty"`
 	Operation     string                 `protobuf:"bytes,7,opt,name=operation,proto3" json:"operation,omitempty"`
 	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
 	Result        float64                `protobuf:"fixed64,9,opt,name=result,proto3" json:"result,omitempty"`
@@ -73,9 +73,9 @@ func (x *Task) GetId() int32 {
 	return 0
 }
 
-func (x *Task) GetExpressionID() int32 {
+func (x *Task) GetExpressionId() int32 {
 	if x != nil {
-		return x.ExpressionID
+		return x.ExpressionId
 	}
 	return 0
 }
@@ -94,16 +94,16 @@ func (x *Task) GetArg2() float64 {
 	return 0
 }
 
-func (x *Task) GetPrevTask_ID1() int32 {
+func (x *Task) GetPrevTask_Id1() int32 {
 	if x != nil {
-		return x.PrevTask_ID1
+		return x.PrevTask_Id1
 	}
 	return 0
 }
 
-func (x *Task) GetPrevTask_ID2() int32 {
+func (x *Task) GetPrevTask_Id2() int32 {
 	if x != nil {
-		return x.PrevTask_ID2
+		return x.PrevTask_Id2
 	}
 	return 0
 }
@@ -328,11 +328,11 @@ const file_proto_calc_proto_rawDesc = "" +
 	"\x10proto/calc.proto\x12\x05proto\"\xf8\x01\n" +
 	"\x04Task\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\"\n" +
-	"\fexpressionID\x18\x02 \x01(\x05R\fexpressionID\x12\x12\n" +
+	"\fexpressionId\x18\x02 \x01(\x05R\fexpressionId\x12\x12\n" +
 	"\x04arg1\x18\x03 \x01(\x01R\x04arg1\x12\x12\n" +
 	"\x04arg2\x18\x04 \x01(\x01R\x04arg2\x12\"\n" +
-	"\rprev_task_ID1\x18\x05 \x01(\x05R\vprevTaskID1\x12\"\n" +
-	"\rprev_task_ID2\x18\x06 \x01(\x05R\vprevTaskID2\x12\x1c\n" +
+	"\rprev_task_Id1\x18\x05 \x01(\x05R\vprevTaskId1\x12\"\n" +
+	"\rprev_task_Id2\x18\x06 \x01(\x05R\vprevTaskId2\x12\x1c\n" +
 	"\toperation\x18\a \x01(\tR\toperation\x12\x16\n" +
 	"\x06status\x18\b \x01(\tR\x06status\x12\x16\n" +
 	"\x06result\x18\t \x01(\x01R\x06result\"(\n" +

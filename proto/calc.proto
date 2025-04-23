@@ -4,11 +4,11 @@ option go_package = "https://github.com/bulbosaur/calculator-with-authorization/
 
 message Task{
   int32 id = 1;
-  int32 expressionID = 2;
+  int32 expressionId = 2;
   double arg1 = 3;
   double arg2 = 4;
-  int32 prev_task_ID1 = 5;
-  int32 prev_task_ID2 = 6;
+  int32 prev_task_Id1 = 5;
+  int32 prev_task_Id2 = 6;
   string operation = 7;
   string status = 8;
   double result = 9;

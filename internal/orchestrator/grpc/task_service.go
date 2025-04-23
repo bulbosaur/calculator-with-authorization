@@ -40,11 +40,11 @@ func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest
 
 	return &proto.Task{
 		Id:           int32(task.ID),
-		ExpressionID: int32(task.ExpressionID),
+		ExpressionId: int32(task.ExpressionID),
 		Arg1:         task.Arg1,
 		Arg2:         task.Arg2,
-		PrevTaskID1:  int32(task.PrevTaskID1),
-		PrevTaskID2:  int32(task.PrevTaskID2),
+		PrevTask_Id1: int32(task.PrevTaskID1),
+		PrevTask_Id2: int32(task.PrevTaskID2),
 		Operation:    task.Operation,
 	}, nil
 }
