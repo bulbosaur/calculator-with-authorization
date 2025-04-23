@@ -19,6 +19,15 @@ message Context {
   
 }
 
+message GetTaskResultRequest {
+  int32 task_id = 1;
+}
+
+message GetTaskResultResponse {
+  bool success = 1;
+  double result = 2;
+}
+
 message GetTaskRequest {
   Context ctx = 1;
 }
@@ -34,6 +43,7 @@ message SubmitTaskResultResponse {
 }
 
 service TaskService {
+  rpc GetTaskResult(GetTaskResultRequest) returns (GetTaskResultResponse);
   rpc ReceiveTask (GetTaskRequest) returns (Task);
   rpc SubmitTaskResult (SubmitTaskResultRequest) returns (SubmitTaskResultResponse);
 }

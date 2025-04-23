@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	TaskService_GetTaskResult_FullMethodName    = "/proto.TaskService/GetTaskResult"
 	TaskService_ReceiveTask_FullMethodName      = "/proto.TaskService/ReceiveTask"
 	TaskService_SubmitTaskResult_FullMethodName = "/proto.TaskService/SubmitTaskResult"
 )
@@ -27,6 +28,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TaskServiceClient interface {
+	GetTaskResult(ctx context.Context, in *GetTaskResultRequest, opts ...grpc.CallOption) (*GetTaskResultResponse, error)
 	ReceiveTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*Task, error)
 	SubmitTaskResult(ctx context.Context, in *SubmitTaskResultRequest, opts ...grpc.CallOption) (*SubmitTaskResultResponse, error)
 }
@@ -37,6 +39,16 @@ type taskServiceClient struct {
 
 func NewTaskServiceClient(cc grpc.ClientConnInterface) TaskServiceClient {
 	return &taskServiceClient{cc}
+}
+
+func (c *taskServiceClient) GetTaskResult(ctx context.Context, in *GetTaskResultRequest, opts ...grpc.CallOption) (*GetTaskResultResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTaskResultResponse)
+	err := c.cc.Invoke(ctx, TaskService_GetTaskResult_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *taskServiceClient) ReceiveTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*Task, error) {
@@ -63,6 +75,7 @@ func (c *taskServiceClient) SubmitTaskResult(ctx context.Context, in *SubmitTask
 // All implementations must embed UnimplementedTaskServiceServer
 // for forward compatibility.
 type TaskServiceServer interface {
+	GetTaskResult(context.Context, *GetTaskResultRequest) (*GetTaskResultResponse, error)
 	ReceiveTask(context.Context, *GetTaskRequest) (*Task, error)
 	SubmitTaskResult(context.Context, *SubmitTaskResultRequest) (*SubmitTaskResultResponse, error)
 	mustEmbedUnimplementedTaskServiceServer()
@@ -75,6 +88,9 @@ type TaskServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTaskServiceServer struct{}
 
+func (UnimplementedTaskServiceServer) GetTaskResult(context.Context, *GetTaskResultRequest) (*GetTaskResultResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTaskResult not implemented")
+}
 func (UnimplementedTaskServiceServer) ReceiveTask(context.Context, *GetTaskRequest) (*Task, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReceiveTask not implemented")
 }
@@ -100,6 +116,24 @@ func RegisterTaskServiceServer(s grpc.ServiceRegistrar, srv TaskServiceServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&TaskService_ServiceDesc, srv)
+}
+
+func _TaskService_GetTaskResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTaskResultRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).GetTaskResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_GetTaskResult_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).GetTaskResult(ctx, req.(*GetTaskResultRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _TaskService_ReceiveTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -145,6 +179,10 @@ var TaskService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.TaskService",
 	HandlerType: (*TaskServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetTaskResult",
+			Handler:    _TaskService_GetTaskResult_Handler,
+		},
 		{
 			MethodName: "ReceiveTask",
 			Handler:    _TaskService_ReceiveTask_Handler,

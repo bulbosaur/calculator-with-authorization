@@ -11,7 +11,7 @@ import (
 )
 
 // RunOrchestrator запускает http сервер оркестратора
-func RunOrchestrator(exprRepo *repository.ExpressionModel) {
+func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 
 	host := viper.GetString("server.ORC_HOST")
 	port := viper.GetString("server.ORC_PORT")

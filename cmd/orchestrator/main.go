@@ -4,7 +4,8 @@ import (
 	"log"
 
 	config "github.com/bulbosaur/calculator-with-authorization/config"
-	orchestrator "github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/http"
+	orchestratorGRPC "github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/grpc"
+	orchestratorHTTP "github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 	"github.com/spf13/viper"
 
@@ -25,5 +26,6 @@ func main() {
 
 	defer db.Close()
 
-	orchestrator.RunOrchestrator(ExprRepo)
+	orchestratorHTTP.RunHTTPOrchestrator(ExprRepo)
+	orchestratorGRPC.RunGRPCOrchestrator(ExprRepo)
 }

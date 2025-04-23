@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"context"
 	"log"
 	"sync"
 	"time"
@@ -9,15 +10,16 @@ import (
 // Mu - мьютекс в рамках микросервиса данного агента
 var Mu sync.Mutex
 
-func worker(id int, orchestratorURL string) {
+func (a *GRPCAgent) worker(id int) {
 	sem := make(chan struct{}, Workers)
 	interval := 1 * time.Second
+	ctx := context.Background()
 
 	for {
 		sem <- struct{}{}
 		Mu.Lock()
 
-		task, err := getTask(orchestratorURL)
+		task, err := a.getTask(ctx)
 
 		Mu.Unlock()
 
@@ -28,7 +30,7 @@ func worker(id int, orchestratorURL string) {
 			continue
 		}
 
-		result, errorMessage, err := executeTask(orchestratorURL, task)
+		result, errorMessage, err := a.executeTask(ctx, task)
 		if err != nil && task.ID != 0 {
 			log.Printf("Worker %d: execution error task ID-%d: %v", id, task.ID, err)
 			time.Sleep(interval)
@@ -37,7 +39,7 @@ func worker(id int, orchestratorURL string) {
 		}
 
 		if task.ID != 0 {
-			err = sendResult(orchestratorURL, task.ID, result, errorMessage)
+			err = a.sendResult(ctx, task.ID, result, errorMessage)
 			if err != nil {
 				log.Printf("Worker %d: sending error task ID-%d: %v", id, task.ID, err)
 			} else {

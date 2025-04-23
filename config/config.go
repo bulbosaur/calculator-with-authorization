@@ -12,8 +12,10 @@ func Init() {
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	viper.SetDefault("server.ORC_HOST", "localhost")
-	viper.SetDefault("server.ORC_PORT", "8080")
+	viper.SetDefault("server.HTTP_HOST", "localhost")
+	viper.SetDefault("server.HTTP_PORT", "8080")
+	viper.SetDefault("server.GRPC_HOST", "localhost")
+	viper.SetDefault("server.GRPC_PORT", "50051")
 
 	viper.SetDefault("duration.TIME_ADDITION_MS", 100)
 	viper.SetDefault("duration.TIME_SUBTRACTION_MS", 100)
@@ -36,9 +38,12 @@ func Init() {
 }
 
 func logConfig() {
-	log.Printf("Configuration: ORC_HOST=%s, ORC_PORT=%s, TIME_ADDITION_MS=%d, TIME_SUBTRACTION_MS=%d, TIME_MULTIPLICATIONS_MS=%d, TIME_DIVISIONS_MS=%d, DATABASE_PATH=%s",
-		viper.GetString("server.ORC_HOST"),
-		viper.GetString("server.ORC_PORT"),
+	log.Printf(
+		"Configuration: HTTP_HOST=%s, HTTP_PORT=%s, GRPC_HOST=%s, GRPC_PORT=%s, TIME_ADDITION_MS=%d, TIME_SUBTRACTION_MS=%d, TIME_MULTIPLICATIONS_MS=%d, TIME_DIVISIONS_MS=%d, DATABASE_PATH=%s",
+		viper.GetString("server.HTTP_HOST"),
+		viper.GetString("server.HTTP_PORT"),
+		viper.GetString("server.GRPC_HOST"),
+		viper.GetString("server.GRPC_PORT"),
 		viper.GetInt("duration.TIME_ADDITION_MS"),
 		viper.GetInt("duration.TIME_SUBTRACTION_MS"),
 		viper.GetInt("duration.TIME_MULTIPLICATIONS_MS"),
