@@ -21,7 +21,7 @@ func newTaskServer(repo *repository.ExpressionModel) *TaskServer {
 	return &TaskServer{exprRepo: repo}
 }
 
-// Receivetask обрабатывает запрос от агента на получение задачи
+// ReceiveTask обрабатывает запрос от агента на получение задачи
 func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest) (*proto.Task, error) {
 	// Проверка аутентификации
 	// if req.GetCtx() == nil || req.GetCtx().GetAuthToken() == "" {
@@ -54,8 +54,8 @@ func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest
 }
 
 // SubmitTaskResult обрабатывает результат выполнения задачи от агента
-func (s *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTaskResultRequest) (*proto.SubmitTaskResultResponse, error) {
-	err := s.exprRepo.UpdateTaskResult(
+func (ts *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTaskResultRequest) (*proto.SubmitTaskResultResponse, error) {
+	err := ts.exprRepo.UpdateTaskResult(
 		int(req.TaskId),
 		req.Result,
 		req.ErrorMessage,
@@ -70,8 +70,8 @@ func (s *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTask
 }
 
 // GetTaskResult возвращает результат выполнения задачи
-func (s *TaskServer) GetTaskResult(ctx context.Context, req *proto.GetTaskResultRequest) (*proto.GetTaskResultResponse, error) {
-	task, err := s.exprRepo.GetTaskByID(int(req.TaskId))
+func (ts *TaskServer) GetTaskResult(ctx context.Context, req *proto.GetTaskResultRequest) (*proto.GetTaskResultResponse, error) {
+	task, err := ts.exprRepo.GetTaskByID(int(req.TaskId))
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "task not found: %v", err)
 	}

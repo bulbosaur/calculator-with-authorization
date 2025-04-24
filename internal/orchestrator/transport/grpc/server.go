@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// RunGRPCServer запускает gRPC сервер оркестратора
+// RunGRPCOrchestrator запускает gRPC сервер оркестратора
 func RunGRPCOrchestrator(exprRepo *repository.ExpressionModel) {
 	host := viper.GetString("server.GRPC_HOST")
 	port := viper.GetString("server.GRPC_PORT")

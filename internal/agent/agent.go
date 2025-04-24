@@ -16,6 +16,7 @@ import (
 // Workers - переменная, в которой хранится количество одновременно работающих воркеров
 var Workers int
 
+// GRPCAgent - gRPC-клиент для взаимодействия с оркестратором вычислений
 type GRPCAgent struct {
 	client proto.TaskServiceClient
 	conn   *grpc.ClientConn

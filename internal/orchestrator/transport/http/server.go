@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// RunOrchestrator запускает http сервер оркестратора
+// RunHTTPOrchestrator запускает http сервер оркестратора
 func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 
 	host := viper.GetString("server.HTTP_HOST")

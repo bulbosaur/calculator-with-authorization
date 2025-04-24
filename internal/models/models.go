@@ -1,10 +1,10 @@
 package models
 
 var (
-	// StatusCalculate указываеь таски, над которыми сейчас работает воркер
+	// StatusInProcess указываеь таски, над которыми сейчас работает воркер
 	StatusInProcess = "calculating"
 
-	// StatusNew, указывает, что объект только что был создан
+	// StatusNew указывает, что объект только что был создан
 	StatusNew = "created"
 
 	// StatusFailed указывает, что выражение не решено. Причиной может быть его некорректность
