@@ -168,9 +168,5 @@ func (a *GRPCAgent) sendResult(ctx context.Context, taskID int, result float64, 
 		return fmt.Errorf("failed to send result: %v", err)
 	}
 
-	// if resp.StatusCode != http.StatusOK {
-	// 	return fmt.Errorf("orchestrator returned status code %d", resp.StatusCode)
-	// }
-
 	return nil
 }

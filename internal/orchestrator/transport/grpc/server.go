@@ -27,7 +27,7 @@ func RunGRPCOrchestrator(exprRepo *repository.ExpressionModel) {
 		grpc.MaxSendMsgSize(10*1024*1024),
 	)
 
-	proto.RegisterTaskServiceServer(s, NewTaskServer(exprRepo))
+	proto.RegisterTaskServiceServer(s, newTaskServer(exprRepo))
 
 	log.Print("Starting gRPC server...")
 	log.Printf("gRPC server listening on %s", addr)

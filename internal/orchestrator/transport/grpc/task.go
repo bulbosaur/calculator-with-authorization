@@ -11,15 +11,17 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// TaskServer реализует gRPC-сервис для управления задачами
 type TaskServer struct {
 	proto.UnimplementedTaskServiceServer
 	exprRepo *repository.ExpressionModel
 }
 
-func NewTaskServer(repo *repository.ExpressionModel) *TaskServer {
+func newTaskServer(repo *repository.ExpressionModel) *TaskServer {
 	return &TaskServer{exprRepo: repo}
 }
 
+// Receivetask обрабатывает запрос от агента на получение задачи
 func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest) (*proto.Task, error) {
 	// Проверка аутентификации
 	// if req.GetCtx() == nil || req.GetCtx().GetAuthToken() == "" {
@@ -36,7 +38,7 @@ func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest
 		return nil, status.Error(codes.NotFound, "no tasks available")
 	}
 
-	ts.exprRepo.UpdateTaskStatus(id, models.StatusCalculate)
+	ts.exprRepo.UpdateTaskStatus(id, models.StatusInProcess)
 
 	return &proto.Task{
 		Id:           int32(task.ID),
@@ -49,20 +51,9 @@ func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest
 		Status:       task.Status,
 		Result:       task.Result,
 	}, nil
-
-	// return &proto.Task{
-	// 	Id:           1,
-	// 	ExpressionId: 1,
-	// 	Arg1:         3,
-	// 	Arg2:         4,
-	// 	PrevTask_Id1: 0,
-	// 	PrevTask_Id2: 0,
-	// 	Operation:    "+",
-	// 	Status:       "pending",
-	// 	Result:       0,
-	// }, nil
 }
 
+// SubmitTaskResult обрабатывает результат выполнения задачи от агента
 func (s *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTaskResultRequest) (*proto.SubmitTaskResultResponse, error) {
 	err := s.exprRepo.UpdateTaskResult(
 		int(req.TaskId),

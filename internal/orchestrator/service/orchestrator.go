@@ -33,6 +33,8 @@ func NewTask(id int, arg1, arg2 float64, operation string) *models.Task {
 		Arg1:         arg1,
 		Arg2:         arg2,
 		Operation:    operation,
+		Status:       models.StatusNew,
+		Result:       0,
 	}
 	return &newTask
 }

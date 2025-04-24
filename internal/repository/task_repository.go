@@ -44,8 +44,8 @@ func (e *ExpressionModel) GetTask() (*models.Task, int, error) {
         SELECT id, expressionID, arg1, arg2, prev_task_id1, prev_task_id2, operation, status, result
         FROM tasks
         WHERE status = ?
-        AND (prev_task_id1 = 0 OR prev_task_id1 IN (SELECT id FROM tasks WHERE status = ?))
-        AND (prev_task_id2 = 0 OR prev_task_id2 IN (SELECT id FROM tasks WHERE status = ?))
+        AND (prev_task_id1 = 0 OR prev_task_id1 IN (SELECT id FROM tasks WHERE status = ? AND result IS NOT NULL))
+        AND (prev_task_id2 = 0 OR prev_task_id2 IN (SELECT id FROM tasks WHERE status = ? AND result IS NOT NULL))
         LIMIT 1
     `
 
