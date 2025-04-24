@@ -68,3 +68,22 @@ func (s *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTask
 
 	return &proto.SubmitTaskResultResponse{Success: true}, nil
 }
+
+// GetTaskResult возвращает результат выполнения задачи
+func (s *TaskServer) GetTaskResult(ctx context.Context, req *proto.GetTaskResultRequest) (*proto.GetTaskResultResponse, error) {
+	task, err := s.exprRepo.GetTaskByID(int(req.TaskId))
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "task not found: %v", err)
+	}
+
+	if task.Status != models.StatusResolved {
+		return &proto.GetTaskResultResponse{
+			Success: false,
+		}, nil
+	}
+
+	return &proto.GetTaskResultResponse{
+		Success: true,
+		Result:  task.Result,
+	}, nil
+}
