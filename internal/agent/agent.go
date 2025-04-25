@@ -100,25 +100,9 @@ func (a *GRPCAgent) executeTask(ctx context.Context, task *models.Task) (float64
 	}
 
 	var arg1, arg2 float64
-	var err error
 
-	if task.PrevTaskID1 != 0 {
-		arg1, err = a.fetchTaskResult(ctx, task.PrevTaskID1)
-		if err != nil {
-			return 0, "", fmt.Errorf("failed to get result for PrevTaskID1 (%d): %v", task.PrevTaskID1, err)
-		}
-	} else {
-		arg1 = task.Arg1
-	}
-
-	if task.PrevTaskID2 != 0 {
-		arg2, err = a.fetchTaskResult(ctx, task.PrevTaskID2)
-		if err != nil {
-			return 0, "", fmt.Errorf("failed to get result for PrevTaskID2 (%d): %v", task.PrevTaskID2, err)
-		}
-	} else {
-		arg2 = task.Arg2
-	}
+	arg1 = task.Arg1
+	arg2 = task.Arg2
 
 	if task.Operation == "" {
 		return 0, "", fmt.Errorf("invalid operation: operation is empty")
@@ -143,19 +127,6 @@ func (a *GRPCAgent) executeTask(ctx context.Context, task *models.Task) (float64
 	default:
 		return 0, "", fmt.Errorf("invalid operation: %s", task.Operation)
 	}
-}
-
-func (a *GRPCAgent) fetchTaskResult(ctx context.Context, taskID int) (float64, error) {
-	resp, err := a.client.GetTaskResult(ctx, &proto.GetTaskResultRequest{TaskId: int32(taskID)})
-	if err != nil {
-		return 0, fmt.Errorf("failed to get task result: %v", err)
-	}
-
-	if !resp.Success {
-		return 0, fmt.Errorf("task with ID %d is not done yet", taskID)
-	}
-
-	return resp.Result, nil
 }
 
 func (a *GRPCAgent) sendResult(ctx context.Context, taskID int, result float64, errorMessage string) error {

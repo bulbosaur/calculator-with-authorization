@@ -41,11 +41,17 @@ func (e *ExpressionModel) InsertTask(task *models.Task) (int, error) {
 // GetTask забирает из базы таску для агента
 func (e *ExpressionModel) GetTask() (*models.Task, int, error) {
 	query := `
-        SELECT id, expressionID, arg1, arg2, prev_task_id1, prev_task_id2, operation, status, result
-        FROM tasks
-        WHERE status = ?
-        AND (prev_task_id1 = 0 OR prev_task_id1 IN (SELECT id FROM tasks WHERE status = ? AND result IS NOT NULL))
-        AND (prev_task_id2 = 0 OR prev_task_id2 IN (SELECT id FROM tasks WHERE status = ? AND result IS NOT NULL))
+        SELECT t.id, t.expressionID, 
+               COALESCE(t1.result, t.arg1) AS arg1, 
+               COALESCE(t2.result, t.arg2) AS arg2, 
+               t.prev_task_id1, t.prev_task_id2, 
+               t.operation, t.status, t.result
+        FROM tasks t
+        LEFT JOIN tasks t1 ON t.prev_task_id1 = t1.id
+        LEFT JOIN tasks t2 ON t.prev_task_id2 = t2.id
+        WHERE t.status = ?
+        AND (t.prev_task_id1 = 0 OR t1.status = ?)
+        AND (t.prev_task_id2 = 0 OR t2.status = ?)
         LIMIT 1
     `
 
@@ -66,6 +72,11 @@ func (e *ExpressionModel) GetTask() (*models.Task, int, error) {
 			return nil, 0, nil
 		}
 		return nil, 0, fmt.Errorf("failed to get task: %v", err)
+	}
+
+	_, err = e.DB.Exec("UPDATE tasks SET status = ? WHERE id = ?", models.StatusInProcess, task.ID)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to update task status: %v", err)
 	}
 
 	return &task, task.ID, nil
