@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 var (
 	// StatusInProcess указываеь таски, над которыми сейчас работает воркер
 	StatusInProcess = "calculating"
@@ -26,6 +28,7 @@ type ErrorResponse struct {
 // Expression - структура математического выражения
 type Expression struct {
 	ID           int     `json:"id"`
+	UserID       int     `json:"user_id"`
 	Expression   string  `json:"expression"`
 	Status       string  `json:"status"`
 	Result       float64 `json:"result"`
@@ -69,4 +72,12 @@ type TaskResponse struct {
 type Token struct {
 	Value    string
 	IsNumber bool
+}
+
+// User описывает структуру пользователя
+type User struct {
+	ID           int       `json:"id"`
+	Login        string    `json:"login"`
+	PasswordHash string    `json:"password_hash"`
+	CreatedAt    time.Time `json:"created_at"`
 }

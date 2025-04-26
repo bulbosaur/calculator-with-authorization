@@ -33,34 +33,47 @@ func InitDB(path string) (*sql.DB, error) {
 	db.SetConnMaxLifetime(0)
 
 	createExpressions := `
- CREATE TABLE IF NOT EXISTS expressions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  expression TEXT NOT NULL,
-  status TEXT NOT NULL,
-  result FLOAT64 DEFAULT 0,
-  error_message TEXT DEFAULT ""
- );`
+ 	CREATE TABLE IF NOT EXISTS expressions (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER,
+		expression TEXT NOT NULL,
+		status TEXT NOT NULL,
+		result FLOAT64 DEFAULT 0,
+		error_message TEXT DEFAULT ""
+ 	);`
 	_, err = db.Exec(createExpressions)
 	if err != nil {
 		return nil, fmt.Errorf("error creating expressions table: %v", err)
 	}
 
 	createTasks := `
- CREATE TABLE IF NOT EXISTS tasks (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  expressionID INTEGER NOT NULL,
-  arg1 TEXT NOT NULL,
-  arg2 TEXT NOT NULL,
-  prev_task_id1 INTEGER DEFAULT 0,
-  prev_task_id2 INTEGER DEFAULT 0,
-  operation TEXT NOT NULL,
-  status TEXT,
-  result FLOAT,
-  error_message TEXT DEFAULT ""
- );`
+	CREATE TABLE IF NOT EXISTS tasks (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		expressionID INTEGER NOT NULL,
+		arg1 TEXT NOT NULL,
+		arg2 TEXT NOT NULL,
+		prev_task_id1 INTEGER DEFAULT 0,
+		prev_task_id2 INTEGER DEFAULT 0,
+		operation TEXT NOT NULL,
+		status TEXT,
+		result FLOAT,
+		error_message TEXT DEFAULT ""
+	);`
 	_, err = db.Exec(createTasks)
 	if err != nil {
 		return nil, fmt.Errorf("error creating tasks table: %v", err)
+	}
+
+	createUsers := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		login TEXT NOT NULL UNIQUE,
+		password_hash TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`
+	_, err = db.Exec(createUsers)
+	if err != nil {
+		return nil, fmt.Errorf("error creating users table: %v", err)
 	}
 
 	err = db.Ping()
