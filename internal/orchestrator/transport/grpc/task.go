@@ -68,22 +68,3 @@ func (ts *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTas
 
 	return &proto.SubmitTaskResultResponse{Success: true}, nil
 }
-
-// GetTaskResult возвращает результат выполнения задачи
-func (ts *TaskServer) GetTaskResult(ctx context.Context, req *proto.GetTaskResultRequest) (*proto.GetTaskResultResponse, error) {
-	task, err := ts.exprRepo.GetTaskByID(int(req.TaskId))
-	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "task not found: %v", err)
-	}
-
-	if task.Status != models.StatusResolved {
-		return &proto.GetTaskResultResponse{
-			Success: false,
-		}, nil
-	}
-
-	return &proto.GetTaskResultResponse{
-		Success: true,
-		Result:  task.Result,
-	}, nil
-}
