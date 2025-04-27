@@ -1,4 +1,4 @@
-package orchestrator
+package handlers
 
 import (
 	"net/http"

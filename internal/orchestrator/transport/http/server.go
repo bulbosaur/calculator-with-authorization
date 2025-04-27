@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/handlers"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
@@ -19,11 +20,11 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", indexHandler)
-	router.HandleFunc("/api/v1/calculate", regHandler(exprRepo)).Methods("POST")
-	router.HandleFunc("/api/v1/expressions", listHandler(exprRepo)).Methods("GET")
-	router.HandleFunc("/api/v1/expressions/{id}", resultHandler(exprRepo)).Methods("GET")
-	router.HandleFunc("/coffee", CoffeeHandler)
+	router.HandleFunc("/", handlers.IndexHandler)
+	router.HandleFunc("/api/v1/calculate", handlers.RegHandler(exprRepo)).Methods("POST")
+	router.HandleFunc("/api/v1/expressions", handlers.ListHandler(exprRepo)).Methods("GET")
+	router.HandleFunc("/api/v1/expressions/{id}", handlers.ResultHandler(exprRepo)).Methods("GET")
+	router.HandleFunc("/coffee", handlers.CoffeeHandler)
 
 	log.Printf("HTTP orchestrator starting on %s", addr)
 	err := http.ListenAndServe(addr, router)

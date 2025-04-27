@@ -1,4 +1,4 @@
-package orchestrator
+package handlers
 
 import (
 	"encoding/json"
@@ -10,7 +10,8 @@ import (
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 )
 
-func regHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
+// RegHandler принимает введенное пользователем выражение и занимается его дальнейшей обработкой. После всех валидаций и подсчетов возвращает результат и код ответа
+func RegHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request := new(models.Request)
 		defer r.Body.Close()

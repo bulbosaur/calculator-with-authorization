@@ -1,4 +1,4 @@
-package orchestrator
+package handlers
 
 import (
 	"encoding/json"
@@ -10,7 +10,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func resultHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
+// ResultHandler выводит всю информацию по конкретному выражению
+func ResultHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"]

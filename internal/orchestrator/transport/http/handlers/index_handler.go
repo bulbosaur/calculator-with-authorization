@@ -1,8 +1,9 @@
-package orchestrator
+package handlers
 
 import "net/http"
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+// IndexHandler - главная страница с графическим интерфейсом
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	html := `<!DOCTYPE html>
 <html lang="ru">

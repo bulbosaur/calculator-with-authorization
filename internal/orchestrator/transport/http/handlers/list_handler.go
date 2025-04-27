@@ -1,4 +1,4 @@
-package orchestrator
+package handlers
 
 import (
 	"encoding/json"
@@ -10,7 +10,8 @@ import (
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 )
 
-func listHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
+// ListHandler выводит список всех выражений
+func ListHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var expressions []models.Expression
 		var result string
