@@ -10,6 +10,8 @@ import (
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 )
 
+// LoginHandler - хендлер авторизации. Пользователь отправляет запрос POST /api/v1/login { "login": , "password": }
+// В ответ получае 200+OK и JWT токен
 func LoginHandler(exprRepo *repository.ExpressionModel, cfg *config.JWTConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var creds models.User

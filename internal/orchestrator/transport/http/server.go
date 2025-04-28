@@ -27,6 +27,7 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel, cfg *config.JWTCo
 	router.HandleFunc("/api/v1/expressions/{id}", handlers.ResultHandler(exprRepo)).Methods("GET")
 	router.HandleFunc("/coffee", handlers.CoffeeHandler)
 	router.HandleFunc("/api/v1/login", handlers.LoginHandler(exprRepo, cfg)).Methods("POST")
+	router.HandleFunc("/api/v1/register", handlers.Register(exprRepo)).Methods("POST")
 
 	log.Printf("HTTP orchestrator starting on %s", addr)
 	err := http.ListenAndServe(addr, router)
