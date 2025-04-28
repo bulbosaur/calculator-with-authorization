@@ -21,7 +21,7 @@ func Register(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(models.ErrorResponse{
 				Error:        "Bad request",
-				ErrorMessage: models.ErrorInvalidRequestBody.Error(),
+				ErrorMessage: err.Error(),
 			})
 			return
 		}
