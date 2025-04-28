@@ -1,11 +1,28 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
+
+// JWTConfig - конфигурационная структура
+type JWTConfig struct {
+	SecretKey     string        `mapstructure:"secret_key"`
+	TokenDuration time.Duration `mapstructure:"token_duration"`
+}
+
+// LoadJWTConfig загружает конфигурацию для авторизации
+func LoadJWTConfig() (*JWTConfig, error) {
+	cfg := &JWTConfig{}
+	if err := viper.UnmarshalKey("jwt", cfg); err != nil {
+		return nil, fmt.Errorf("failed to load JWT config: %w", err)
+	}
+	return cfg, nil
+}
 
 // Init считывает переменные окружения
 func Init() {
