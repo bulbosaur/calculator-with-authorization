@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/spf13/viper"
 )
 
 // Claims - это данные, которые будут храниться в JWT
@@ -13,11 +14,13 @@ type Claims struct {
 }
 
 // GenerateJWT создает новый токен, подписанный секретным ключом
-func GenerateJWT(userID int, secretKey string, expires time.Duration) (string, error) {
+func GenerateJWT(userID int, secretKey string) (string, error) {
+	expires := viper.GetDuration("jwt.token_duration")
+
 	claims := &Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expires)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expires * time.Hour)),
 		},
 	}
 
@@ -31,8 +34,10 @@ func ParseJWT(tokenString string, secretKey string) (*Claims, error) {
 		return []byte(secretKey), nil
 	})
 
+	print(token.Valid)
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		return claims, nil
 	}
+
 	return nil, err
 }

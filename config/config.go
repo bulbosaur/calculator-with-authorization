@@ -1,28 +1,11 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/spf13/viper"
 )
-
-// JWTConfig - конфигурационная структура
-type JWTConfig struct {
-	SecretKey     string        `mapstructure:"secret_key"`
-	TokenDuration time.Duration `mapstructure:"token_duration"`
-}
-
-// LoadJWTConfig загружает конфигурацию для авторизации
-func LoadJWTConfig() (*JWTConfig, error) {
-	cfg := &JWTConfig{}
-	if err := viper.UnmarshalKey("jwt", cfg); err != nil {
-		return nil, fmt.Errorf("failed to load JWT config: %w", err)
-	}
-	return cfg, nil
-}
 
 // Init считывает переменные окружения
 func Init() {
@@ -41,6 +24,9 @@ func Init() {
 	viper.SetDefault("DATABASE_PATH", "./db/calc.db")
 	viper.SetDefault("worker.COMPUTING_POWER", 5)
 
+	viper.SetDefault("jwt.secret_key", "your_secret_key_here")
+	viper.SetDefault("jwt.token_duration", 24)
+
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
 	viper.AddConfigPath("./config")
@@ -56,7 +42,7 @@ func Init() {
 
 func logConfig() {
 	log.Printf(
-		"Configuration: HTTP_HOST=%s, HTTP_PORT=%s, GRPC_HOST=%s, GRPC_PORT=%s, TIME_ADDITION_MS=%d, TIME_SUBTRACTION_MS=%d, TIME_MULTIPLICATIONS_MS=%d, TIME_DIVISIONS_MS=%d, DATABASE_PATH=%s",
+		"Configuration: HTTP_HOST=%s, HTTP_PORT=%s, GRPC_HOST=%s, GRPC_PORT=%s, TIME_ADDITION_MS=%d, TIME_SUBTRACTION_MS=%d, TIME_MULTIPLICATIONS_MS=%d, TIME_DIVISIONS_MS=%d, DATABASE_PATH=%s, jwt.secret_key=%s, jwt.token_duration=%d",
 		viper.GetString("server.HTTP_HOST"),
 		viper.GetString("server.HTTP_PORT"),
 		viper.GetString("server.GRPC_HOST"),
@@ -66,5 +52,7 @@ func logConfig() {
 		viper.GetInt("duration.TIME_MULTIPLICATIONS_MS"),
 		viper.GetInt("duration.TIME_DIVISIONS_MS"),
 		viper.GetString("DATABASE_PATH"),
+		viper.GetString("jwt.secret_key"),
+		viper.GetInt("jwt.token_duration"),
 	)
 }

@@ -13,39 +13,59 @@ import (
 // В ответ получаем 200+OK (в случае успеха) или ошибку
 func Register(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var user models.User
+		var request struct {
+			Login    string `json:"login"`
+			Password string `json:"password"`
+		}
 		defer r.Body.Close()
 
-		err := json.NewDecoder(r.Body).Decode(&user)
-		if err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(models.ErrorResponse{
 				Error:        "Bad request",
-				ErrorMessage: err.Error(),
+				ErrorMessage: models.ErrorInvalidRequestBody.Error(),
 			})
 			return
 		}
 
-		exist, _ := exprRepo.GetUserByLogin(user.Login)
+		exist, _ := exprRepo.GetUserByLogin(request.Login)
 		if exist != nil {
-			http.Error(w, "User already exists", http.StatusBadRequest)
+			w.WriteHeader(http.StatusConflict)
+			json.NewEncoder(w).Encode(models.ErrorResponse{
+				Error:        "Conflict",
+				ErrorMessage: "User already exists",
+			})
 			return
 		}
 
-		hash, err := auth.GenerateHash(user.PasswordHash)
+		hash, err := auth.GenerateHash(request.Password)
 		if err != nil {
-			http.Error(w, "Failed to generate hash", http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(models.ErrorResponse{
+				Error:        "Internal error",
+				ErrorMessage: "Failed to generate password hash",
+			})
 			return
 		}
 
-		user.PasswordHash = hash
+		user := &models.User{
+			Login:        request.Login,
+			PasswordHash: hash,
+		}
 
-		err = exprRepo.CreateUser(&user)
-		if err != nil {
-			http.Error(w, "Failed to create user", http.StatusInternalServerError)
+		if err := exprRepo.CreateUser(user); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(models.ErrorResponse{
+				Error:        "Internal error",
+				ErrorMessage: "Failed to create user",
+			})
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "User created successfully",
+			"user_id": user.ID,
+		})
 	}
 }

@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bulbosaur/calculator-with-authorization/config"
 	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
+	"github.com/spf13/viper"
 )
 
 // LoginHandler - хендлер авторизации. Пользователь отправляет запрос POST /api/v1/login { "login": , "password": }
 // В ответ получае 200+OK и JWT токен
-func LoginHandler(exprRepo *repository.ExpressionModel, cfg *config.JWTConfig) http.HandlerFunc {
+func LoginHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var creds models.User
 		defer r.Body.Close()
@@ -37,7 +37,13 @@ func LoginHandler(exprRepo *repository.ExpressionModel, cfg *config.JWTConfig) h
 			return
 		}
 
-		token, err := auth.GenerateJWT(user.ID, cfg.SecretKey, cfg.TokenDuration)
+		// if !auth.CheckPasswordHash(creds.PasswordHash, user.PasswordHash) {
+		// 	w.WriteHeader(http.StatusUnauthorized)
+		// 	return
+		// }
+
+		SecretKey := viper.GetString("jwt.secret_key")
+		token, err := auth.GenerateJWT(user.ID, SecretKey)
 
 		if err != nil {
 			http.Error(w, "Failed to generate token", http.StatusInternalServerError)
@@ -45,6 +51,9 @@ func LoginHandler(exprRepo *repository.ExpressionModel, cfg *config.JWTConfig) h
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"token": token})
+		json.NewEncoder(w).Encode(map[string]string{
+			"token":   token,
+			"message": "Authentication successful",
+		})
 	}
 }

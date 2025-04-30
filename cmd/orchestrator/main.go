@@ -16,10 +16,6 @@ func main() {
 	log.Println("Starting server...")
 
 	config.Init()
-	cfg, err := config.LoadJWTConfig()
-	if err != nil {
-		log.Fatalf("failed to load JWT config; %v", err)
-	}
 
 	db, err := repository.InitDB(viper.GetString("DATABASE_PATH"))
 	if err != nil {
@@ -30,6 +26,6 @@ func main() {
 
 	defer db.Close()
 
-	go orchestratorHTTP.RunHTTPOrchestrator(ExprRepo, cfg)
+	go orchestratorHTTP.RunHTTPOrchestrator(ExprRepo)
 	orchestratorGRPC.RunGRPCOrchestrator(ExprRepo)
 }
