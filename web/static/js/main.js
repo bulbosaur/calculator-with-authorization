@@ -30,6 +30,11 @@ async function pollResult(taskId) {
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calculateForm').addEventListener('submit', async function(e) {
       e.preventDefault();
+      if (!localStorage.getItem('token')) {
+        alert('Требуется авторизация!');
+        window.location.href = '/login';
+        return;
+      }
       const finalResultDiv = document.getElementById('finalResult');
       finalResultDiv.style.display = 'block';
       finalResultDiv.innerText = "Вычисляется...";

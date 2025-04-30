@@ -27,6 +27,8 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 	)
 
 	router.HandleFunc("/", handlers.IndexHandler).Methods("GET")
+	router.HandleFunc("/login", handlers.LoginPageHandler).Methods("GET")
+
 	router.HandleFunc("/api/v1/login", handlers.LoginHandler(exprRepo)).Methods("POST")
 	router.HandleFunc("/api/v1/register", handlers.Register(exprRepo)).Methods("POST")
 
