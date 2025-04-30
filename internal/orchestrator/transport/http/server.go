@@ -7,6 +7,7 @@ import (
 
 	"github.com/bulbosaur/calculator-with-authorization/config"
 	"github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/handlers"
+	"github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/middlewares"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
@@ -21,14 +22,15 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel, cfg *config.JWTCo
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", handlers.IndexHandler)
-	router.HandleFunc("/api/v1/calculate", handlers.RegHandler(exprRepo)).Methods("POST")
-	router.HandleFunc("/api/v1/expressions", handlers.ListHandler(exprRepo)).Methods("GET")
-	router.HandleFunc("/api/v1/expressions/{id}", handlers.ResultHandler(exprRepo)).Methods("GET")
-	router.HandleFunc("/coffee", handlers.CoffeeHandler)
 	router.HandleFunc("/api/v1/login", handlers.LoginHandler(exprRepo, cfg)).Methods("POST")
 	router.HandleFunc("/api/v1/register", handlers.Register(exprRepo)).Methods("POST")
 
+	protected := router.PathPrefix("/api/v1").Subrouter()
+	protected.Use(middlewares.AuthMiddleware(cfg))
+
+	protected.HandleFunc("/calculate", handlers.RegHandler(exprRepo)).Methods("POST")
+	protected.HandleFunc("/expressions", handlers.ListHandler(exprRepo)).Methods("GET")
+	protected.HandleFunc("/expressions/{id}", handlers.ResultHandler(exprRepo)).Methods("GET")
 	log.Printf("HTTP orchestrator starting on %s", addr)
 	err := http.ListenAndServe(addr, router)
 

@@ -19,6 +19,14 @@ var (
 	StatusWait = "awaiting processing"
 )
 
+// ContextKey - тип для ключа контекста
+type ContextKey string
+
+const (
+	// UserIDKey - типизированная константа ID пользователя
+	UserIDKey ContextKey = "userID"
+)
+
 // ErrorResponse - структура ответа, возвращаемого при ошибке вычислений
 type ErrorResponse struct {
 	Error        string `json:"error"`
