@@ -70,10 +70,10 @@ func (e *ExpressionModel) CalculateExpressionResult(exprID int) (float64, string
 }
 
 // Insert записывает мат выражение в таблицу БД
-func (e *ExpressionModel) Insert(expression string, user_id int) (int, error) {
+func (e *ExpressionModel) Insert(expression string, userID int) (int, error) {
 	query := "INSERT INTO expressions (user_id, expression, status, result) VALUES (?, ?, ?, ?)"
 
-	result, err := e.DB.Exec(query, user_id, expression, models.StatusWait, 0)
+	result, err := e.DB.Exec(query, userID, expression, models.StatusWait, 0)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %v", models.ErrorCreatingDatabaseRecord, err)
 	}

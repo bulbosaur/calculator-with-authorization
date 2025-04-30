@@ -1,4 +1,3 @@
-// handlers/register_page.go
 package handlers
 
 import (

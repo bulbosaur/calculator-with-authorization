@@ -53,7 +53,7 @@ func Register(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 			PasswordHash: hash,
 		}
 
-		userId, err := exprRepo.CreateUser(user)
+		userID, err := exprRepo.CreateUser(user)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -67,7 +67,7 @@ func Register(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"message": "User created successfully",
-			"user_id": userId,
+			"user_id": userID,
 		})
 	}
 }
