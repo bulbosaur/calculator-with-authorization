@@ -8,9 +8,13 @@ async function pollResult(taskId) {
     resultDiv.style.display = 'block';
     resultDiv.innerText = "Вычисляется...";
     try {
-      const response = await fetch('/api/v1/expressions/' + encodeURIComponent(taskId));
+      const response = await fetch('/api/v1/expressions/' + encodeURIComponent(taskId), {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       if (!response.ok) {
-        resultDiv.innerText = 'Ошибка получения результата: ' + await response.text();
+        resultDiv.innerText = 'Ошибка получения результата: ' + await response.text() + 'id: ' + taskId;
         return;
       }
       const data = await response.json();

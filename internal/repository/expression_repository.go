@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"sync"
 
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 )
@@ -12,7 +11,6 @@ import (
 // ExpressionModel обертывает пул подключения sql.DB
 type ExpressionModel struct {
 	DB *sql.DB
-	mu sync.Mutex
 }
 
 // NewExpressionModel создает экземпляр ExpressionModel
