@@ -3,8 +3,8 @@ package models
 import "errors"
 
 var (
-	// ErrorCreatingDatabaseRecord - ошибка записи мат выражения в БД
-	ErrorCreatingDatabaseRecord = errors.New("an error occurred while writing an expression to the database")
+	// ErrorCreatingDatabaseRecord - ошибка записи в БД
+	ErrorCreatingDatabaseRecord = errors.New("an error occurred while writing to the database")
 
 	// ErrorDivisionByZero - ошибка деления на ноль
 	ErrorDivisionByZero = errors.New("division by zero")

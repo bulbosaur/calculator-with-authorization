@@ -26,7 +26,7 @@ func ListHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 
 		for rows.Next() {
 			var expr models.Expression
-			err := rows.Scan(&expr.ID, &expr.Expression, &expr.Status, &result, &expr.ErrorMessage)
+			err := rows.Scan(&expr.ID, &expr.UserID, &expr.Expression, &expr.Status, &result, &expr.ErrorMessage)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)

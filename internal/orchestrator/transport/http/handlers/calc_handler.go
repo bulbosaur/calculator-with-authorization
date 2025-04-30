@@ -26,9 +26,16 @@ func RegHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 			return
 		}
 
-		id, err := exprRepo.Insert(request.Expression)
+		userID, ok := r.Context().Value(models.UserIDKey).(int)
+		if !ok {
+			http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+			return
+		}
+
+		id, err := exprRepo.Insert(request.Expression, userID)
 		if err != nil {
 			log.Printf("something went wrong while creating a record in the database. %v", err)
+			return
 		}
 		log.Printf("Expression ID-%d has been registered", id)
 

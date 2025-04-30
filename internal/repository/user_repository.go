@@ -3,14 +3,24 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 )
 
 // CreateUser вносит в БД данного юзера
-func (e *ExpressionModel) CreateUser(user *models.User) error {
-	_, err := e.DB.Exec("INSERT INTO users (login, password_hash) VALUES (?, ?)", user.Login, user.PasswordHash)
-	return err
+func (e *ExpressionModel) CreateUser(user *models.User) (int, error) {
+	result, err := e.DB.Exec("INSERT INTO users (login, password_hash) VALUES (?, ?)", user.Login, user.PasswordHash)
+	if err != nil {
+		return 0, fmt.Errorf("%w: %v", models.ErrorCreatingDatabaseRecord, err)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("%w: %v", models.ErrorReceivingID, err)
+	}
+	user.ID = int(id)
+	return int(id), nil
 }
 
 // GetUserByLogin возвращает данные юзера по логину
