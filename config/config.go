@@ -42,7 +42,7 @@ func Init() {
 
 func logConfig() {
 	log.Printf(
-		"Configuration: HTTP_HOST=%s, HTTP_PORT=%s, GRPC_HOST=%s, GRPC_PORT=%s, TIME_ADDITION_MS=%d, TIME_SUBTRACTION_MS=%d, TIME_MULTIPLICATIONS_MS=%d, TIME_DIVISIONS_MS=%d, DATABASE_PATH=%s, jwt.secret_key=%s, jwt.token_duration=%d",
+		"Configuration: HTTP_HOST=%s, HTTP_PORT=%s, GRPC_HOST=%s, GRPC_PORT=%s, TIME_ADDITION_MS=%d, TIME_SUBTRACTION_MS=%d, TIME_MULTIPLICATIONS_MS=%d, TIME_DIVISIONS_MS=%d, DATABASE_PATH=%s, jwt.token_duration=%d",
 		viper.GetString("server.HTTP_HOST"),
 		viper.GetString("server.HTTP_PORT"),
 		viper.GetString("server.GRPC_HOST"),
@@ -52,7 +52,6 @@ func logConfig() {
 		viper.GetInt("duration.TIME_MULTIPLICATIONS_MS"),
 		viper.GetInt("duration.TIME_DIVISIONS_MS"),
 		viper.GetString("DATABASE_PATH"),
-		viper.GetString("jwt.secret_key"),
 		viper.GetInt("jwt.token_duration"),
 	)
 }

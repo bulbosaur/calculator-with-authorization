@@ -23,11 +23,6 @@ func newTaskServer(repo *repository.ExpressionModel) *TaskServer {
 
 // ReceiveTask обрабатывает запрос от агента на получение задачи
 func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest) (*proto.Task, error) {
-	// Проверка аутентификации
-	// if req.GetCtx() == nil || req.GetCtx().GetAuthToken() == "" {
-	//     return nil, status.Error(codes.Unauthenticated, "authentication required")
-	// }
-
 	task, id, err := ts.exprRepo.GetTask()
 	if err != nil {
 		log.Println("Failed to get task:", err)
