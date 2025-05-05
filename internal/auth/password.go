@@ -1,9 +1,17 @@
 package auth
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"errors"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 // GenerateHash создает bcrypt хэш
 func GenerateHash(password string) (string, error) {
+	if password == "" {
+		return "", errors.New("password cannot be empty")
+	}
+
 	saltedBytes := []byte(password)
 	hashedBytes, err := bcrypt.GenerateFromPassword(saltedBytes, bcrypt.DefaultCost)
 	if err != nil {

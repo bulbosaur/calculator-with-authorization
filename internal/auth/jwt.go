@@ -34,9 +34,13 @@ func ParseJWT(tokenString string, secretKey string) (*Claims, error) {
 		return []byte(secretKey), nil
 	})
 
+	if err != nil {
+		return nil, err
+	}
+
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		return claims, nil
 	}
 
-	return nil, err
+	return nil, jwt.ErrInvalidKey
 }
