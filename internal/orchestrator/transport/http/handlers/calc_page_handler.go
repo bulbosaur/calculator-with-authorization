@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 )
 
+// CalcPageHandler обработчик страницы калькулятора
 func CalcPageHandler(w http.ResponseWriter, r *http.Request) {
 	htmlpath := filepath.Join("web", "templates", "calc.html")
 	htmlContent, err := os.ReadFile(htmlpath)
