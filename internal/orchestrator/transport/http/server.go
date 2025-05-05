@@ -27,7 +27,7 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 	)
 
 	router.HandleFunc("/", handlers.IndexHandler).Methods("GET")
-	router.HandleFunc("/calculator", handlers.CalcPageHandler).Methods("GET")
+
 	router.HandleFunc("/login", handlers.LoginPageHandler).Methods("GET")
 	router.HandleFunc("/register", handlers.RegisterPageHandler).Methods("GET")
 
@@ -37,6 +37,7 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 	protected := router.PathPrefix("/api/v1").Subrouter()
 	protected.Use(middlewares.AuthMiddleware())
 
+	protected.HandleFunc("/calculator", handlers.CalcPageHandler).Methods("GET")
 	protected.HandleFunc("/calculate", handlers.RegHandler(exprRepo)).Methods("POST")
 	protected.HandleFunc("/expressions", handlers.ListHandler(exprRepo)).Methods("GET")
 	protected.HandleFunc("/expressions/{id}", handlers.ResultHandler(exprRepo)).Methods("GET")

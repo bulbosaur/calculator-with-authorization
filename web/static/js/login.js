@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const response = await fetch('/api/v1/login', {
           method: 'POST',
-          body: formData
+          body: JSON.stringify({ login, password }), 
         });
   
         const data = await response.json();
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
   
         localStorage.setItem('token', data.token);
-        window.location.href = '/';
+        window.location.href = '/calculator';
         
       } catch (error) {
         errorDiv.style.display = 'block';
