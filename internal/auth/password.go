@@ -16,9 +16,6 @@ func GenerateHash(password string) (string, error) {
 
 // Compare сравнивает хэш с паролем
 func Compare(hash, password string) bool {
-	incoming := []byte(password)
-	existing := []byte(hash)
-
-	err := bcrypt.CompareHashAndPassword(existing, incoming)
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

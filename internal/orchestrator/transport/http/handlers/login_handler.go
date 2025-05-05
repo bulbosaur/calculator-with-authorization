@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
@@ -14,11 +15,13 @@ import (
 // В ответ получае 200+OK и JWT токен
 func LoginHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var creds models.User
+		var request struct {
+			Login    string `json:"login"`
+			Password string `json:"password"`
+		}
 		defer r.Body.Close()
 
-		err := json.NewDecoder(r.Body).Decode(&creds)
-		if err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(models.ErrorResponse{
 				Error:        "Bad request",
@@ -27,7 +30,10 @@ func LoginHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 			return
 		}
 
-		user, err := exprRepo.GetUserByLogin(creds.Login)
+		login := request.Login
+		password := request.Password
+
+		user, err := exprRepo.GetUserByLogin(login)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(models.ErrorResponse{
@@ -37,7 +43,7 @@ func LoginHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 			return
 		}
 
-		if !auth.Compare(user.PasswordHash, creds.PasswordHash) {
+		if !auth.Compare(user.PasswordHash, password) {
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(models.ErrorResponse{
 				Error:        "Unauthorized",
@@ -53,6 +59,8 @@ func LoginHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 			http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 			return
 		}
+
+		log.Printf("%s logged in successfully", login)
 
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]string{
