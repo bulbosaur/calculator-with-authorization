@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web-calculator-golang API</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Web-calculator-golang API</h1>
+    
+    <form id="calculateForm">
+      <label for="expression">Введите выражение:</label><br>
+      <input type="text" id="expression" name="expression" placeholder="2 * 2" required><br>
+      <button type="submit">Отправить выражение</button>
+    </form>
+    <div id="taskResult" class="result" style="display: none;"></div>
+    
+    <hr>
+    
+    <div id="finalResult" class="result" style="display: none;"></div>
+  </div>
+</body>
+</html>

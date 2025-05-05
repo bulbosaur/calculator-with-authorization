@@ -37,10 +37,14 @@ func LoginHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 			return
 		}
 
-		// if !auth.CheckPasswordHash(creds.PasswordHash, user.PasswordHash) {
-		// 	w.WriteHeader(http.StatusUnauthorized)
-		// 	return
-		// }
+		if !auth.Compare(user.PasswordHash, creds.PasswordHash) {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(models.ErrorResponse{
+				Error:        "Unauthorized",
+				ErrorMessage: "Invalid password",
+			})
+			return
+		}
 
 		SecretKey := viper.GetString("jwt.secret_key")
 		token, err := auth.GenerateJWT(user.ID, SecretKey)
