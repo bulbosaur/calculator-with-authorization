@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -77,6 +78,16 @@ func TestExecuteTask(t *testing.T) {
 			task:    &models.Task{Operation: "invalid"},
 			wantErr: true,
 		},
+		{
+			name:       "Multiplication",
+			task:       &models.Task{ID: 3, Operation: "*", Arg1: 4, Arg2: 5},
+			wantResult: 20,
+		},
+		{
+			name:       "Subtraction",
+			task:       &models.Task{ID: 4, Operation: "-", Arg1: 10, Arg2: 7},
+			wantResult: 3,
+		},
 	}
 
 	for _, tt := range tests {
@@ -138,4 +149,65 @@ func TestGRPCAgentIntegration(t *testing.T) {
 			t.Fatal("Timeout waiting for result")
 		}
 	})
+}
+
+type mockTaskServiceClient struct {
+	proto.TaskServiceClient
+	receiveTaskError bool
+}
+
+func (m *mockTaskServiceClient) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest, opts ...grpc.CallOption) (*proto.Task, error) {
+	if m.receiveTaskError {
+		return nil, fmt.Errorf("mock receive error")
+	}
+	return &proto.Task{}, nil
+}
+
+func TestGetTask_Error(t *testing.T) {
+	agent := &GRPCAgent{
+		client: &mockTaskServiceClient{receiveTaskError: true},
+	}
+	_, err := agent.getTask(context.Background())
+	assert.Error(t, err, "Error expected but got nil")
+}
+
+func (m *mockTaskServiceClient) SubmitTaskResult(ctx context.Context, req *proto.SubmitTaskResultRequest, opts ...grpc.CallOption) (*proto.SubmitTaskResultResponse, error) {
+	return nil, fmt.Errorf("mock submit error")
+}
+
+func TestSendResult_Error(t *testing.T) {
+	agent := &GRPCAgent{
+		client: &mockTaskServiceClient{},
+	}
+	err := agent.sendResult(context.Background(), 1, 10, "")
+	assert.Error(t, err, "Error sending result expected")
+}
+
+func TestExecuteTask_NilTask(t *testing.T) {
+	agent := &GRPCAgent{}
+	_, _, err := agent.executeTask(context.Background(), nil)
+	assert.Error(t, err, "Error expected for nil task")
+}
+
+func TestExecuteTask_ZeroID(t *testing.T) {
+	agent := &GRPCAgent{}
+	task := &models.Task{ID: 0}
+	_, _, err := agent.executeTask(context.Background(), task)
+	assert.Error(t, err, "Error expected for task with ID=0")
+}
+
+func TestExecuteTask_EmptyOperation(t *testing.T) {
+	agent := &GRPCAgent{}
+	task := &models.Task{ID: 1, Operation: ""}
+	_, _, err := agent.executeTask(context.Background(), task)
+	assert.Error(t, err, "An empty operation error was expected.")
+}
+
+func TestExecuteTask_DivisionByZero(t *testing.T) {
+	agent := &GRPCAgent{}
+	task := &models.Task{ID: 1, Operation: "/", Arg1: 5, Arg2: 0}
+	result, errMsg, err := agent.executeTask(context.Background(), task)
+	assert.NoError(t, err, "Expected nil, but got error")
+	assert.Equal(t, models.ErrorDivisionByZero.Error(), errMsg, "Expected division by zero error message")
+	assert.Equal(t, 0.0, result, "Result should be 0")
 }
