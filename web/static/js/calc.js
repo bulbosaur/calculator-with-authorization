@@ -4,6 +4,7 @@ async function pollResult(taskId) {
       window.location.href = '/login';
       return;
     }
+
     const resultDiv = document.getElementById('finalResult');
     resultDiv.style.display = 'block';
     resultDiv.innerText = "Вычисляется...";

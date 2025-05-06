@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
   
         localStorage.setItem('token', data.token);
-        window.location.href = '/calculator';
+        window.location.href = '/calculator?token=' + data.token;
+        errorDiv.style.display = 'none';
         
       } catch (error) {
         errorDiv.style.display = 'block';
