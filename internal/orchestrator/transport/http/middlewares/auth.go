@@ -21,6 +21,10 @@ func AuthMiddleware() mux.MiddlewareFunc {
 
 			if authHeader == "" {
 				token := r.URL.Query().Get("token")
+				if token == "" {
+					http.Error(w, "Missing token", http.StatusUnauthorized)
+					return
+				}
 				authHeader = "Bearer " + token
 			}
 

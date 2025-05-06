@@ -45,11 +45,12 @@ async function pollResult(taskId) {
       finalResultDiv.innerText = "Вычисляется...";
       
       try {
-        const response = await fetch('/api/v1/calculate', {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/v1/calculate?token=${token}`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({ expression: document.getElementById('expression').value })
         });
