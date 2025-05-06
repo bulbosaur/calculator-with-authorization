@@ -31,16 +31,19 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 	router.HandleFunc("/login", handlers.LoginPageHandler).Methods("GET")
 	router.HandleFunc("/register", handlers.RegisterPageHandler).Methods("GET")
 
+	router.HandleFunc("/coffee", handlers.CoffeeHandler).Methods("GET")
+
 	router.HandleFunc("/api/v1/login", handlers.LoginHandler(exprRepo)).Methods("POST")
 	router.HandleFunc("/api/v1/register", handlers.Register(exprRepo)).Methods("POST")
 
-	protected := router.PathPrefix("/api/v1").Subrouter()
+	protected := router.PathPrefix("").Subrouter()
 	protected.Use(middlewares.AuthMiddleware())
 
 	protected.HandleFunc("/calculator", handlers.CalcPageHandler).Methods("GET")
-	protected.HandleFunc("/calculate", handlers.RegHandler(exprRepo)).Methods("POST")
-	protected.HandleFunc("/expressions", handlers.ListHandler(exprRepo)).Methods("GET")
-	protected.HandleFunc("/expressions/{id}", handlers.ResultHandler(exprRepo)).Methods("GET")
+
+	protected.HandleFunc("/api/v1/calculate", handlers.RegHandler(exprRepo)).Methods("POST")
+	protected.HandleFunc("/api/v1/expressions", handlers.ListHandler(exprRepo)).Methods("GET")
+	protected.HandleFunc("/api/v1/expressions/{id}", handlers.ResultHandler(exprRepo)).Methods("GET")
 
 	log.Printf("HTTP orchestrator starting on %s", addr)
 	err := http.ListenAndServe(addr, router)
