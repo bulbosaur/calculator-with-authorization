@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strings"
 
@@ -17,7 +16,6 @@ func AuthMiddleware() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
-			log.Printf("Auth header: %s", authHeader)
 
 			if authHeader == "" {
 				token := r.URL.Query().Get("token")
@@ -33,8 +31,6 @@ func AuthMiddleware() mux.MiddlewareFunc {
 				http.Error(w, "Invalid authorization format", http.StatusUnauthorized)
 				return
 			}
-
-			log.Printf("Query token: %s", tokenParts)
 
 			SecretKey := viper.GetString("jwt.secret_key")
 

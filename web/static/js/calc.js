@@ -46,7 +46,8 @@ async function pollResult(taskId) {
       
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`/api/v1/calculate?token=${token}`, {
+        
+        const response = await fetch('/api/v1/calculate', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',

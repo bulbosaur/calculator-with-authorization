@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Web-calculator-golang API</title>
   <link rel="stylesheet" href="/static/css/style.css">
-  <script src="/static/js/main.js" defer></script>
+  <script src="/static/js/calc.js" defer></script>
 </head>
 <body>
   <div class="container">
     <h1>Web-calculator-golang API</h1>
     
-    <form id="calculateForm" method="POST" action="/api/v1/calculate">
+    <form id="calculateForm" method="POST">
       <label for="expression">Введите выражение:</label><br>
       <input type="text" id="expression" name="expression" placeholder="2 * 2" required><br>
       <button type="submit">Отправить выражение</button>
