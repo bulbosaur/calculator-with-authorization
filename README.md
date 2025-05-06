@@ -41,3 +41,6 @@ go test -cover .\internal\agent\
 ```bash
 go test -cover .\internal\auth\
 ```
+```bash
+go test -cover .\internal\orchestrator\transport\http\handlers\
+```
