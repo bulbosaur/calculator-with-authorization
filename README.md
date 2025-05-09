@@ -48,5 +48,5 @@ go test -cover .\internal\auth\
 ```bash
 go test -cover .\internal\orchestrator\transport\http\handlers\
 
-# ok        coverage: 46.5% of statements
+# ok        coverage: 65.3% of statements
 ```

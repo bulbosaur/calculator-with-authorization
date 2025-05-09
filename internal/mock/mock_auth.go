@@ -10,7 +10,7 @@ type AuthProvider struct {
 	ParseJWTFunc     func(tokenString string) (*auth.Claims, error)
 }
 
-// GenerateHash имитирует метод GenerateHash
+// GenerateHash имитирует метод auth.GenerateHash
 func (m *AuthProvider) GenerateHash(password string) (string, error) {
 	if m.GenerateHashFunc != nil {
 		return m.GenerateHashFunc(password)
@@ -18,7 +18,7 @@ func (m *AuthProvider) GenerateHash(password string) (string, error) {
 	return "", nil
 }
 
-// Compare имитирует метод Compare
+// Compare имитирует метод auth.Compare
 func (m *AuthProvider) Compare(hash, password string) bool {
 	if m.CompareFunc != nil {
 		return m.CompareFunc(hash, password)
@@ -26,7 +26,7 @@ func (m *AuthProvider) Compare(hash, password string) bool {
 	return true
 }
 
-// GenerateJWT имитирует метод GenerateJWT
+// GenerateJWT имитирует метод auth.GenerateJWT
 func (m *AuthProvider) GenerateJWT(userID int) (string, error) {
 	if m.GenerateJWTFunc != nil {
 		return m.GenerateJWTFunc(userID)
@@ -34,7 +34,7 @@ func (m *AuthProvider) GenerateJWT(userID int) (string, error) {
 	return "mock_token", nil
 }
 
-// ParseJWT имитирует метод ParseJWT
+// ParseJWT имитирует метод auth.ParseJWT
 func (m *AuthProvider) ParseJWT(tokenString string) (*auth.Claims, error) {
 	if m.ParseJWTFunc != nil {
 		return m.ParseJWTFunc(tokenString)
