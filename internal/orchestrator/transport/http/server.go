@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
 	"github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/handlers"
 	"github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/middlewares"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
@@ -18,6 +19,8 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 	host := viper.GetString("server.HTTP_HOST")
 	port := viper.GetString("server.HTTP_PORT")
 	addr := fmt.Sprintf("%s:%s", host, port)
+
+	authService := auth.NewAuthService(viper.GetString("jwt.secret_key"), viper.GetDuration("jwt.token_duration"))
 
 	router := mux.NewRouter()
 	router.Use(mux.CORSMethodMiddleware(router))
@@ -33,17 +36,17 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 
 	router.HandleFunc("/coffee", handlers.CoffeeHandler).Methods("GET")
 
-	router.HandleFunc("/api/v1/login", handlers.LoginHandler(exprRepo)).Methods("POST")
-	router.HandleFunc("/api/v1/register", handlers.Register(exprRepo)).Methods("POST")
+	router.HandleFunc("/api/v1/login", handlers.LoginHandler(authService, exprRepo)).Methods("POST")
+	router.HandleFunc("/api/v1/register", handlers.Register(authService, exprRepo)).Methods("POST")
 
 	protected := router.PathPrefix("").Subrouter()
-	protected.Use(middlewares.AuthMiddleware())
+	protected.Use(middlewares.AuthMiddleware(authService))
 
 	protected.HandleFunc("/calculator", handlers.CalcPageHandler).Methods("GET")
 
 	protected.HandleFunc("/api/v1/calculate", handlers.RegHandler(exprRepo)).Methods("POST")
-	protected.HandleFunc("/api/v1/expressions", handlers.ListHandler(exprRepo)).Methods("GET")
-	protected.HandleFunc("/api/v1/expressions/{id}", handlers.ResultHandler(exprRepo)).Methods("GET")
+	protected.HandleFunc("/api/v1/expressions", handlers.ListHandler(authService, exprRepo)).Methods("GET")
+	protected.HandleFunc("/api/v1/expressions/{id}", handlers.ResultHandler(authService, exprRepo)).Methods("GET")
 
 	log.Printf("HTTP orchestrator starting on %s", addr)
 	err := http.ListenAndServe(addr, router)

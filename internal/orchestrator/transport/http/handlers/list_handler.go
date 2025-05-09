@@ -10,11 +10,10 @@ import (
 	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
-	"github.com/spf13/viper"
 )
 
 // ListHandler выводит список всех выражений
-func ListHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
+func ListHandler(authProvider auth.AuthProvider, exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -30,8 +29,7 @@ func ListHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 
 		token := tokenParts[1]
 
-		secretKey := viper.GetString("jwt.secret_key")
-		claims, err := auth.ParseJWT(token, secretKey)
+		claims, err := authProvider.ParseJWT(token)
 		if err != nil {
 			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
 			return

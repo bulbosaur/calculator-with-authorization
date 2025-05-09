@@ -8,12 +8,11 @@ import (
 	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
-	"github.com/spf13/viper"
 )
 
 // LoginHandler - хендлер авторизации. Пользователь отправляет запрос POST /api/v1/login { "login": , "password": }
 // В ответ получае 200+OK и JWT токен
-func LoginHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
+func LoginHandler(authProvider auth.AuthProvider, exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request struct {
 			Login    string `json:"login"`
@@ -30,20 +29,17 @@ func LoginHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 			return
 		}
 
-		login := request.Login
-		password := request.Password
-
-		user, err := exprRepo.GetUserByLogin(login)
+		user, err := exprRepo.GetUserByLogin(request.Login)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(models.ErrorResponse{
 				Error:        "Unauthorized",
-				ErrorMessage: err.Error(),
+				ErrorMessage: "user not found",
 			})
 			return
 		}
 
-		if !auth.Compare(user.PasswordHash, password) {
+		if !authProvider.Compare(user.PasswordHash, request.Password) {
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(models.ErrorResponse{
 				Error:        "Unauthorized",
@@ -52,15 +48,13 @@ func LoginHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 			return
 		}
 
-		SecretKey := viper.GetString("jwt.secret_key")
-		token, err := auth.GenerateJWT(user.ID, SecretKey)
-
+		token, err := authProvider.GenerateJWT(user.ID)
 		if err != nil {
 			http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 			return
 		}
 
-		log.Printf("%s logged in successfully", login)
+		log.Printf("%s logged in successfully", request.Login)
 
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]string{

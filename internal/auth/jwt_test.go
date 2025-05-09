@@ -1,25 +1,32 @@
-package auth
+package auth_test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+func testingAuthService() *auth.AuthService {
+	return &auth.AuthService{
+		SecretKey:     "test_secret_key",
+		TokenDuration: 24 * time.Hour,
+	}
+}
+
 func TestGenerateAndParseJWT(t *testing.T) {
 	viper.Set("jwt.token_duration", 24)
 	userID := 123
-	secretKey := "test_secret_key"
 
-	token, err := GenerateJWT(userID, secretKey)
+	token, err := testingAuthService().GenerateJWT(userID)
 	require.NoError(t, err)
 	assert.NotEmpty(t, token)
 
-	claims, err := ParseJWT(token, secretKey)
+	claims, err := testingAuthService().ParseJWT(token)
 	require.NoError(t, err)
 	assert.Equal(t, userID, claims.UserID)
 	assert.WithinDuration(t, time.Now().Add(24*time.Hour), claims.ExpiresAt.Time, time.Minute)
@@ -27,7 +34,7 @@ func TestGenerateAndParseJWT(t *testing.T) {
 
 func TestParseJWT_InvalidToken(t *testing.T) {
 	expiredToken := func() string {
-		claims := &Claims{
+		claims := &auth.Claims{
 			UserID: 123,
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(-24 * time.Hour)),
@@ -38,56 +45,59 @@ func TestParseJWT_InvalidToken(t *testing.T) {
 		return s
 	}()
 
-	validToken, err := GenerateJWT(123, "test_secret_key")
+	validToken, err := testingAuthService().GenerateJWT(123)
 	require.NoError(t, err)
 
 	testCases := []struct {
-		name       string
-		token      string
-		secretKey  string
-		expectErr  bool
-		errMessage string
+		name        string
+		token       string
+		authService *auth.AuthService
+		expectErr   bool
+		errMessage  string
 	}{
 		{
-			name:       "invalid signature",
-			token:      validToken[:len(validToken)-5] + "XXXXX",
-			secretKey:  "test_secret_key",
+			name:        "invalid signature",
+			token:       validToken[:len(validToken)-5] + "XXXXX",
+			authService: testingAuthService(),
+			expectErr:   true,
+			errMessage:  "signature is invalid",
+		},
+		{
+			name:        "expired token",
+			token:       expiredToken,
+			authService: testingAuthService(),
+			expectErr:   true,
+			errMessage:  "token is expired",
+		},
+		{
+			name:        "malformed token",
+			token:       "malformed.token",
+			authService: testingAuthService(),
+			expectErr:   true,
+			errMessage:  "token contains an invalid number of segments",
+		},
+		{
+			name:  "wrong secret key",
+			token: validToken,
+			authService: &auth.AuthService{
+				SecretKey:     "wrong_secret_key",
+				TokenDuration: 24 * time.Hour,
+			},
 			expectErr:  true,
 			errMessage: "signature is invalid",
 		},
 		{
-			name:       "expired token",
-			token:      expiredToken,
-			secretKey:  "test_secret_key",
-			expectErr:  true,
-			errMessage: "token is expired",
-		},
-		{
-			name:       "malformed token",
-			token:      "malformed.token",
-			secretKey:  "test_secret_key",
-			expectErr:  true,
-			errMessage: "token contains an invalid number of segments",
-		},
-		{
-			name:       "wrong secret key",
-			token:      validToken,
-			secretKey:  "wrong_secret_key",
-			expectErr:  true,
-			errMessage: "signature is invalid",
-		},
-		{
-			name:       "empty token",
-			token:      "",
-			secretKey:  "test_secret_key",
-			expectErr:  true,
-			errMessage: "token contains an invalid number of segments",
+			name:        "empty token",
+			token:       "",
+			authService: testingAuthService(),
+			expectErr:   true,
+			errMessage:  "token contains an invalid number of segments",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			claims, err := ParseJWT(tc.token, tc.secretKey)
+			claims, err := tc.authService.ParseJWT(tc.token)
 			if tc.expectErr {
 				require.Error(t, err)
 				if tc.errMessage != "" {
@@ -103,7 +113,12 @@ func TestParseJWT_InvalidToken(t *testing.T) {
 }
 
 func TestGenerateJWT_EmptySecret(t *testing.T) {
-	token, err := GenerateJWT(123, "")
-	assert.Error(t, err)
+	authService := &auth.AuthService{
+		SecretKey:     "",
+		TokenDuration: 24 * time.Hour,
+	}
+	token, err := authService.GenerateJWT(123)
+	require.Error(t, err)
 	assert.Empty(t, token)
+	assert.EqualError(t, err, "secret key is empty")
 }

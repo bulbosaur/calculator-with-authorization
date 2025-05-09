@@ -2,25 +2,36 @@ package auth
 
 import (
 	"errors"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-// GenerateHash создает bcrypt хэш
-var GenerateHash = func(password string) (string, error) {
+// AuthService реализует AuthProvider
+type AuthService struct {
+	SecretKey     string
+	TokenDuration time.Duration
+}
+
+// NewAuthService создает экземпляр AuthService
+func NewAuthService(secretKey string, tokenDuration time.Duration) *AuthService {
+	return &AuthService{
+		SecretKey:     secretKey,
+		TokenDuration: tokenDuration,
+	}
+}
+
+// GenerateHash генирирует хэш из данного пароля
+func (s *AuthService) GenerateHash(password string) (string, error) {
 	if password == "" {
 		return "", errors.New("password cannot be empty")
 	}
-	saltedBytes := []byte(password)
-	hashedBytes, err := bcrypt.GenerateFromPassword(saltedBytes, bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hashedBytes), nil
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(hashedBytes), err
 }
 
 // Compare сравнивает хэш с паролем
-var Compare = func(hash, password string) bool {
+func (s *AuthService) Compare(hash, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

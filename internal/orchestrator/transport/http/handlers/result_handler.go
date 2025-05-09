@@ -10,11 +10,10 @@ import (
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 	"github.com/gorilla/mux"
-	"github.com/spf13/viper"
 )
 
 // ResultHandler выводит всю информацию по конкретному выражению
-func ResultHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
+func ResultHandler(authService *auth.AuthService, exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -30,8 +29,7 @@ func ResultHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 
 		token := tokenParts[1]
 
-		secretKey := viper.GetString("jwt.secret_key")
-		claims, err := auth.ParseJWT(token, secretKey)
+		claims, err := authService.ParseJWT(token)
 		if err != nil {
 			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
 			return

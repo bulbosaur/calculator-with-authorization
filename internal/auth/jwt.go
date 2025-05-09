@@ -1,41 +1,45 @@
 package auth
 
 import (
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/spf13/viper"
 )
 
-// Claims - это данные, которые будут храниться в JWT
+// Claims - данные JWT
 type Claims struct {
 	UserID int `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
+// AuthProvider абстрагирует методы хэширования и работы с JWT
+type AuthProvider interface {
+	GenerateHash(password string) (string, error)
+	Compare(hash, password string) bool
+	GenerateJWT(userID int) (string, error)
+	ParseJWT(tokenString string) (*Claims, error)
+}
+
 // GenerateJWT создает новый токен, подписанный секретным ключом
-var GenerateJWT = func(userID int, secretKey string) (string, error) {
-	if secretKey == "" {
-		return "", jwt.ErrInvalidKey
+func (s *AuthService) GenerateJWT(userID int) (string, error) {
+	if s.SecretKey == "" {
+		return "", errors.New("secret key is empty")
 	}
-
-	expires := viper.GetDuration("jwt.token_duration")
-
 	claims := &Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expires * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.TokenDuration)),
 		},
 	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(secretKey))
+	return token.SignedString([]byte(s.SecretKey))
 }
 
 // ParseJWT парсит токен в Claims и проверяет, что он вадилен
-func ParseJWT(tokenString string, secretKey string) (*Claims, error) {
+func (s *AuthService) ParseJWT(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
+		return []byte(s.SecretKey), nil
 	})
 
 	if err != nil {

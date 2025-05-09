@@ -9,19 +9,35 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
+	"github.com/bulbosaur/calculator-with-authorization/internal/mock"
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/handlers"
 
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 )
 
+type MockPasswordHasher struct{}
+
+func (m *MockPasswordHasher) GenerateHash(password string) (string, error) {
+	return "", errors.New("mock error")
+}
+
+func (m *MockPasswordHasher) Compare(hash, password string) bool {
+	return hash == "valid_hash" && password == "valid_password"
+}
+
 func TestRegister_InvalidRequestBody(t *testing.T) {
 	db, _, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.Register(exprRepo)
+	authService := &auth.AuthService{
+		SecretKey:     "testsecret",
+		TokenDuration: time.Hour,
+	}
+	handler := handlers.Register(authService, exprRepo)
 
 	req, _ := http.NewRequest("POST", "/api/v1/register", io.NopCloser(bytes.NewBufferString("")))
 	req.Header.Set("Content-Type", "application/json")
@@ -46,7 +62,11 @@ func TestRegister_InvalidRequestBody(t *testing.T) {
 func TestRegister_UserAlreadyExists(t *testing.T) {
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.Register(exprRepo)
+	authService := &auth.AuthService{
+		SecretKey:     "testsecret",
+		TokenDuration: time.Hour,
+	}
+	handler := handlers.Register(authService, exprRepo)
 
 	mock.ExpectQuery("SELECT id, login, password_hash FROM users WHERE login = \\?").
 		WithArgs("existing_user").
@@ -76,19 +96,14 @@ func TestRegister_UserAlreadyExists(t *testing.T) {
 }
 
 func TestRegister_PasswordHashGenerationError(t *testing.T) {
-	originalGenerateHash := auth.GenerateHash
-
-	auth.GenerateHash = func(password string) (string, error) {
-		return "", errors.New("mock hash generation error")
+	mockAuth := &mock.MockAuthProvider{
+		GenerateHashFunc: func(password string) (string, error) {
+			return "", errors.New("mock hash generation error")
+		},
 	}
-
-	defer func() {
-		auth.GenerateHash = originalGenerateHash
-	}()
-
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.Register(exprRepo)
+	handler := handlers.Register(mockAuth, exprRepo)
 
 	mock.ExpectQuery("SELECT id, login, password_hash FROM users WHERE login = \\?").
 		WithArgs("new_user").
@@ -97,28 +112,31 @@ func TestRegister_PasswordHashGenerationError(t *testing.T) {
 	reqBody := `{"login":"new_user","password":"password123"}`
 	req := httptest.NewRequest("POST", "/api/v1/register", io.NopCloser(bytes.NewBufferString(reqBody)))
 	req.Header.Set("Content-Type", "application/json")
-
 	w := httptest.NewRecorder()
 	handler(w, req)
 
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("Expected status %d; got %d", http.StatusInternalServerError, w.Code)
 	}
-
 	var response models.ErrorResponse
 	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
 		t.Fatalf("Error decoding response: %v", err)
 	}
-
 	if response.ErrorMessage != "Failed to generate password hash" {
 		t.Errorf("Unexpected error message: %s", response.ErrorMessage)
 	}
 }
 
 func TestRegister_CreateUserError(t *testing.T) {
+	mockAuth := &mock.MockAuthProvider{
+		GenerateHashFunc: func(password string) (string, error) {
+			return "hashed_password", nil
+		},
+	}
+
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.Register(exprRepo)
+	handler := handlers.Register(mockAuth, exprRepo)
 
 	mock.ExpectQuery("SELECT id, login, password_hash FROM users WHERE login = \\?").
 		WithArgs("new_user").
@@ -151,19 +169,14 @@ func TestRegister_CreateUserError(t *testing.T) {
 }
 
 func TestRegister_SuccessfulRegistration(t *testing.T) {
-	originalGenerateHash := auth.GenerateHash
-
-	auth.GenerateHash = func(password string) (string, error) {
-		return "hashed_password", nil
+	mockAuth := &mock.MockAuthProvider{
+		GenerateHashFunc: func(password string) (string, error) {
+			return "hashed_password", nil
+		},
 	}
-
-	defer func() {
-		auth.GenerateHash = originalGenerateHash
-	}()
-
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.Register(exprRepo)
+	handler := handlers.Register(mockAuth, exprRepo)
 
 	mock.ExpectQuery("SELECT id, login, password_hash FROM users WHERE login = \\?").
 		WithArgs("new_user").
@@ -176,23 +189,19 @@ func TestRegister_SuccessfulRegistration(t *testing.T) {
 	reqBody := `{"login":"new_user","password":"password123"}`
 	req := httptest.NewRequest("POST", "/api/v1/register", io.NopCloser(bytes.NewBufferString(reqBody)))
 	req.Header.Set("Content-Type", "application/json")
-
 	w := httptest.NewRecorder()
 	handler(w, req)
 
 	if w.Code != http.StatusCreated {
 		t.Errorf("Expected status %d; got %d", http.StatusCreated, w.Code)
 	}
-
 	var response map[string]interface{}
 	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
 		t.Fatalf("Error decoding response: %v", err)
 	}
-
 	if message, ok := response["message"].(string); !ok || message != "User created successfully" {
 		t.Errorf("Unexpected message: %v", message)
 	}
-
 	if userID, ok := response["user_id"].(float64); !ok || int(userID) != 1 {
 		t.Errorf("Unexpected user ID: %v", userID)
 	}

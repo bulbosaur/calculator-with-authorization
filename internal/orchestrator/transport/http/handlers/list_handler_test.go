@@ -11,6 +11,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
+	"github.com/bulbosaur/calculator-with-authorization/internal/mock"
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/handlers"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
@@ -24,9 +25,10 @@ func setup() (*sql.DB, sqlmock.Sqlmock, error) {
 }
 
 func TestListHandler_MissingAuthHeader(t *testing.T) {
+	mockAuth := &mock.MockAuthProvider{}
 	db, _, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.ListHandler(exprRepo)
+	handler := handlers.ListHandler(mockAuth, exprRepo)
 
 	req, _ := http.NewRequest("GET", "/expressions", nil)
 	w := httptest.NewRecorder()
@@ -39,9 +41,10 @@ func TestListHandler_MissingAuthHeader(t *testing.T) {
 }
 
 func TestListHandler_InvalidAuthFormat(t *testing.T) {
+	mockAuth := &mock.MockAuthProvider{}
 	db, _, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.ListHandler(exprRepo)
+	handler := handlers.ListHandler(mockAuth, exprRepo)
 
 	req, _ := http.NewRequest("GET", "/expressions", nil)
 	req.Header.Set("Authorization", "InvalidFormat")
@@ -55,15 +58,19 @@ func TestListHandler_InvalidAuthFormat(t *testing.T) {
 }
 
 func TestListHandler_InvalidToken(t *testing.T) {
+	mockAuth := &mock.MockAuthProvider{
+		ParseJWTFunc: func(tokenString string) (*auth.Claims, error) {
+			return nil, jwt.ErrInvalidKey
+		},
+	}
+
 	db, _, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.ListHandler(exprRepo)
+	handler := handlers.ListHandler(mockAuth, exprRepo)
 
 	req, _ := http.NewRequest("GET", "/expressions", nil)
 	req.Header.Set("Authorization", "Bearer invalidtoken")
 	w := httptest.NewRecorder()
-
-	viper.Set("jwt.secret_key", "testsecret")
 
 	handler(w, req)
 
@@ -73,28 +80,23 @@ func TestListHandler_InvalidToken(t *testing.T) {
 }
 
 func TestListHandler_DBError(t *testing.T) {
-	db, mock, _ := setup()
-	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.ListHandler(exprRepo)
-
-	claims := &auth.Claims{
-		UserID: 1,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
+	mockAuth := &mock.MockAuthProvider{
+		ParseJWTFunc: func(tokenString string) (*auth.Claims, error) {
+			return &auth.Claims{UserID: 1}, nil
 		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, _ := token.SignedString([]byte("testsecret"))
+
+	db, mock, _ := setup()
+	exprRepo := &repository.ExpressionModel{DB: db}
+	handler := handlers.ListHandler(mockAuth, exprRepo)
 
 	req, _ := http.NewRequest("GET", "/expressions", nil)
-	req.Header.Set("Authorization", "Bearer "+signedToken)
+	req.Header.Set("Authorization", "Bearer validtoken")
 	w := httptest.NewRecorder()
 
 	mock.ExpectQuery("SELECT \\* FROM expressions WHERE user_id = \\$1").
 		WithArgs(1).
 		WillReturnError(errors.New("db error"))
-
-	viper.Set("jwt.secret_key", "testsecret")
 
 	handler(w, req)
 
@@ -104,21 +106,18 @@ func TestListHandler_DBError(t *testing.T) {
 }
 
 func TestListHandler_Success(t *testing.T) {
-	db, mock, _ := setup()
-	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.ListHandler(exprRepo)
-
-	claims := &auth.Claims{
-		UserID: 1,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
+	mockAuth := &mock.MockAuthProvider{
+		ParseJWTFunc: func(tokenString string) (*auth.Claims, error) {
+			return &auth.Claims{UserID: 1}, nil
 		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, _ := token.SignedString([]byte("testsecret"))
+
+	db, mock, _ := setup()
+	exprRepo := &repository.ExpressionModel{DB: db}
+	handler := handlers.ListHandler(mockAuth, exprRepo)
 
 	req, _ := http.NewRequest("GET", "/expressions", nil)
-	req.Header.Set("Authorization", "Bearer "+signedToken)
+	req.Header.Set("Authorization", "Bearer validtoken")
 	w := httptest.NewRecorder()
 
 	rows := sqlmock.NewRows([]string{"id", "user_id", "expression", "status", "result", "error_message"}).
@@ -129,8 +128,6 @@ func TestListHandler_Success(t *testing.T) {
 		WithArgs(1).
 		WillReturnRows(rows)
 
-	viper.Set("jwt.secret_key", "testsecret")
-
 	handler(w, req)
 
 	if w.Code != http.StatusOK {
@@ -138,9 +135,8 @@ func TestListHandler_Success(t *testing.T) {
 	}
 
 	var response []models.Expression
-	err := json.NewDecoder(w.Body).Decode(&response)
-	if err != nil {
-		t.Errorf("Error decoding response: %v", err)
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+		t.Fatalf("Error decoding response: %v", err)
 	}
 
 	if len(response) != 2 {
@@ -153,10 +149,15 @@ func TestListHandler_Success(t *testing.T) {
 }
 
 func TestListHandler_EmptyResult(t *testing.T) {
+	mockAuth := &mock.MockAuthProvider{
+		ParseJWTFunc: func(tokenString string) (*auth.Claims, error) {
+			return &auth.Claims{UserID: 1}, nil
+		},
+	}
+
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.ListHandler(exprRepo)
-
+	handler := handlers.ListHandler(mockAuth, exprRepo)
 	claims := &auth.Claims{
 		UserID: 1,
 		RegisteredClaims: jwt.RegisteredClaims{

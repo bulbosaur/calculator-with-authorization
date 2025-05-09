@@ -8,11 +8,10 @@ import (
 	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/gorilla/mux"
-	"github.com/spf13/viper"
 )
 
 // AuthMiddleware обеспечивает JWT-аутентификацию для API
-func AuthMiddleware() mux.MiddlewareFunc {
+func AuthMiddleware(authService *auth.AuthService) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
@@ -32,9 +31,7 @@ func AuthMiddleware() mux.MiddlewareFunc {
 				return
 			}
 
-			SecretKey := viper.GetString("jwt.secret_key")
-
-			claims, err := auth.ParseJWT(tokenParts[1], SecretKey)
+			claims, err := authService.ParseJWT(tokenParts[1])
 			if err != nil {
 				http.Error(w, "Invalid token", http.StatusUnauthorized)
 				return

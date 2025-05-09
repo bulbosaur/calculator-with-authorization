@@ -12,6 +12,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
+	"github.com/bulbosaur/calculator-with-authorization/internal/mock"
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/handlers"
 	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
@@ -22,7 +23,11 @@ import (
 func TestLoginHandler_InvalidRequestBody(t *testing.T) {
 	db, _, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.LoginHandler(exprRepo)
+	authService := &auth.AuthService{
+		SecretKey:     "testsecret",
+		TokenDuration: time.Hour,
+	}
+	handler := handlers.LoginHandler(authService, exprRepo)
 
 	req, _ := http.NewRequest("POST", "/api/v1/login", io.NopCloser(bytes.NewBufferString("")))
 	req.Header.Set("Content-Type", "application/json")
@@ -47,7 +52,11 @@ func TestLoginHandler_InvalidRequestBody(t *testing.T) {
 func TestLoginHandler_UserNotFound(t *testing.T) {
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.LoginHandler(exprRepo)
+	authService := &auth.AuthService{
+		SecretKey:     "testsecret",
+		TokenDuration: time.Hour,
+	}
+	handler := handlers.LoginHandler(authService, exprRepo)
 
 	mock.ExpectQuery("SELECT id, login, password_hash FROM users WHERE login = \\?").
 		WithArgs("nonexistent_user").
@@ -78,7 +87,11 @@ func TestLoginHandler_UserNotFound(t *testing.T) {
 func TestLoginHandler_InvalidPassword(t *testing.T) {
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.LoginHandler(exprRepo)
+	authService := &auth.AuthService{
+		SecretKey:     "testsecret",
+		TokenDuration: time.Hour,
+	}
+	handler := handlers.LoginHandler(authService, exprRepo)
 
 	mock.ExpectQuery("SELECT id, login, password_hash FROM users WHERE login = \\?").
 		WithArgs("existing_user").
@@ -108,32 +121,25 @@ func TestLoginHandler_InvalidPassword(t *testing.T) {
 }
 
 func TestLoginHandler_SuccessfulLogin(t *testing.T) {
-	originalCompare := auth.Compare
-	originalGenerateJWT := auth.GenerateJWT
-
-	auth.Compare = func(hash, password string) bool {
-		return true
+	mockAuth := &mock.MockAuthProvider{
+		CompareFunc: func(hash, password string) bool {
+			return true
+		},
+		GenerateJWTFunc: func(userID int) (string, error) {
+			claims := &auth.Claims{
+				UserID: userID,
+				RegisteredClaims: jwt.RegisteredClaims{
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+				},
+			}
+			token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+			return token.SignedString([]byte("testsecret"))
+		},
 	}
-
-	auth.GenerateJWT = func(userID int, secretKey string) (string, error) {
-		claims := &auth.Claims{
-			UserID: userID,
-			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
-			},
-		}
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		return token.SignedString([]byte(secretKey))
-	}
-
-	defer func() {
-		auth.Compare = originalCompare
-		auth.GenerateJWT = originalGenerateJWT
-	}()
 
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	handler := handlers.LoginHandler(exprRepo)
+	handler := handlers.LoginHandler(mockAuth, exprRepo)
 
 	mock.ExpectQuery("SELECT id, login, password_hash FROM users WHERE login = \\?").
 		WithArgs("existing_user").
