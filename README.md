@@ -36,11 +36,16 @@
 
 ```bash
 go test -cover .\internal\agent\
+
+# ok        coverage: 65.8% of statements
 ```
 
 ```bash
 go test -cover .\internal\auth\
+
+# ok        coverage: 91.3% of statements
 ```
 ```bash
 go test -cover .\internal\orchestrator\transport\http\handlers\
+# ok        coverage: 47.4% of statements
 ```

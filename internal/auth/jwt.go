@@ -14,7 +14,7 @@ type Claims struct {
 }
 
 // GenerateJWT создает новый токен, подписанный секретным ключом
-func GenerateJWT(userID int, secretKey string) (string, error) {
+var GenerateJWT = func(userID int, secretKey string) (string, error) {
 	if secretKey == "" {
 		return "", jwt.ErrInvalidKey
 	}
