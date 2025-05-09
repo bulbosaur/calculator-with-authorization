@@ -13,7 +13,7 @@ import (
 )
 
 // ListHandler выводит список всех выражений
-func ListHandler(authProvider auth.AuthProvider, exprRepo *repository.ExpressionModel) http.HandlerFunc {
+func ListHandler(authProvider auth.Provider, exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {

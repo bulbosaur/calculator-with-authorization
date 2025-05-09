@@ -20,7 +20,7 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 	port := viper.GetString("server.HTTP_PORT")
 	addr := fmt.Sprintf("%s:%s", host, port)
 
-	authService := auth.NewAuthService(viper.GetString("jwt.secret_key"), viper.GetDuration("jwt.token_duration"))
+	Service := auth.NewService(viper.GetString("jwt.secret_key"), viper.GetDuration("jwt.token_duration"))
 
 	router := mux.NewRouter()
 	router.Use(mux.CORSMethodMiddleware(router))
@@ -36,17 +36,17 @@ func RunHTTPOrchestrator(exprRepo *repository.ExpressionModel) {
 
 	router.HandleFunc("/coffee", handlers.CoffeeHandler).Methods("GET")
 
-	router.HandleFunc("/api/v1/login", handlers.LoginHandler(authService, exprRepo)).Methods("POST")
-	router.HandleFunc("/api/v1/register", handlers.Register(authService, exprRepo)).Methods("POST")
+	router.HandleFunc("/api/v1/login", handlers.LoginHandler(Service, exprRepo)).Methods("POST")
+	router.HandleFunc("/api/v1/register", handlers.Register(Service, exprRepo)).Methods("POST")
 
 	protected := router.PathPrefix("").Subrouter()
-	protected.Use(middlewares.AuthMiddleware(authService))
+	protected.Use(middlewares.AuthMiddleware(Service))
 
 	protected.HandleFunc("/calculator", handlers.CalcPageHandler).Methods("GET")
 
 	protected.HandleFunc("/api/v1/calculate", handlers.RegHandler(exprRepo)).Methods("POST")
-	protected.HandleFunc("/api/v1/expressions", handlers.ListHandler(authService, exprRepo)).Methods("GET")
-	protected.HandleFunc("/api/v1/expressions/{id}", handlers.ResultHandler(authService, exprRepo)).Methods("GET")
+	protected.HandleFunc("/api/v1/expressions", handlers.ListHandler(Service, exprRepo)).Methods("GET")
+	protected.HandleFunc("/api/v1/expressions/{id}", handlers.ResultHandler(Service, exprRepo)).Methods("GET")
 
 	log.Printf("HTTP orchestrator starting on %s", addr)
 	err := http.ListenAndServe(addr, router)

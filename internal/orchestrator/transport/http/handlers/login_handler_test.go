@@ -23,11 +23,11 @@ import (
 func TestLoginHandler_InvalidRequestBody(t *testing.T) {
 	db, _, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	authService := &auth.AuthService{
+	Service := &auth.Service{
 		SecretKey:     "testsecret",
 		TokenDuration: time.Hour,
 	}
-	handler := handlers.LoginHandler(authService, exprRepo)
+	handler := handlers.LoginHandler(Service, exprRepo)
 
 	req, _ := http.NewRequest("POST", "/api/v1/login", io.NopCloser(bytes.NewBufferString("")))
 	req.Header.Set("Content-Type", "application/json")
@@ -52,11 +52,11 @@ func TestLoginHandler_InvalidRequestBody(t *testing.T) {
 func TestLoginHandler_UserNotFound(t *testing.T) {
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	authService := &auth.AuthService{
+	Service := &auth.Service{
 		SecretKey:     "testsecret",
 		TokenDuration: time.Hour,
 	}
-	handler := handlers.LoginHandler(authService, exprRepo)
+	handler := handlers.LoginHandler(Service, exprRepo)
 
 	mock.ExpectQuery("SELECT id, login, password_hash FROM users WHERE login = \\?").
 		WithArgs("nonexistent_user").
@@ -87,11 +87,11 @@ func TestLoginHandler_UserNotFound(t *testing.T) {
 func TestLoginHandler_InvalidPassword(t *testing.T) {
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	authService := &auth.AuthService{
+	Service := &auth.Service{
 		SecretKey:     "testsecret",
 		TokenDuration: time.Hour,
 	}
-	handler := handlers.LoginHandler(authService, exprRepo)
+	handler := handlers.LoginHandler(Service, exprRepo)
 
 	mock.ExpectQuery("SELECT id, login, password_hash FROM users WHERE login = \\?").
 		WithArgs("existing_user").
@@ -121,7 +121,7 @@ func TestLoginHandler_InvalidPassword(t *testing.T) {
 }
 
 func TestLoginHandler_SuccessfulLogin(t *testing.T) {
-	mockAuth := &mock.MockAuthProvider{
+	mockAuth := &mock.AuthProvider{
 		CompareFunc: func(hash, password string) bool {
 			return true
 		},

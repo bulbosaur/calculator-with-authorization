@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func testingAuthService() *auth.AuthService {
-	return &auth.AuthService{
+func testingService() *auth.Service {
+	return &auth.Service{
 		SecretKey:     "test_secret_key",
 		TokenDuration: 24 * time.Hour,
 	}
@@ -22,11 +22,11 @@ func TestGenerateAndParseJWT(t *testing.T) {
 	viper.Set("jwt.token_duration", 24)
 	userID := 123
 
-	token, err := testingAuthService().GenerateJWT(userID)
+	token, err := testingService().GenerateJWT(userID)
 	require.NoError(t, err)
 	assert.NotEmpty(t, token)
 
-	claims, err := testingAuthService().ParseJWT(token)
+	claims, err := testingService().ParseJWT(token)
 	require.NoError(t, err)
 	assert.Equal(t, userID, claims.UserID)
 	assert.WithinDuration(t, time.Now().Add(24*time.Hour), claims.ExpiresAt.Time, time.Minute)
@@ -45,41 +45,41 @@ func TestParseJWT_InvalidToken(t *testing.T) {
 		return s
 	}()
 
-	validToken, err := testingAuthService().GenerateJWT(123)
+	validToken, err := testingService().GenerateJWT(123)
 	require.NoError(t, err)
 
 	testCases := []struct {
-		name        string
-		token       string
-		authService *auth.AuthService
-		expectErr   bool
-		errMessage  string
+		name       string
+		token      string
+		Service    *auth.Service
+		expectErr  bool
+		errMessage string
 	}{
 		{
-			name:        "invalid signature",
-			token:       validToken[:len(validToken)-5] + "XXXXX",
-			authService: testingAuthService(),
-			expectErr:   true,
-			errMessage:  "signature is invalid",
+			name:       "invalid signature",
+			token:      validToken[:len(validToken)-5] + "XXXXX",
+			Service:    testingService(),
+			expectErr:  true,
+			errMessage: "signature is invalid",
 		},
 		{
-			name:        "expired token",
-			token:       expiredToken,
-			authService: testingAuthService(),
-			expectErr:   true,
-			errMessage:  "token is expired",
+			name:       "expired token",
+			token:      expiredToken,
+			Service:    testingService(),
+			expectErr:  true,
+			errMessage: "token is expired",
 		},
 		{
-			name:        "malformed token",
-			token:       "malformed.token",
-			authService: testingAuthService(),
-			expectErr:   true,
-			errMessage:  "token contains an invalid number of segments",
+			name:       "malformed token",
+			token:      "malformed.token",
+			Service:    testingService(),
+			expectErr:  true,
+			errMessage: "token contains an invalid number of segments",
 		},
 		{
 			name:  "wrong secret key",
 			token: validToken,
-			authService: &auth.AuthService{
+			Service: &auth.Service{
 				SecretKey:     "wrong_secret_key",
 				TokenDuration: 24 * time.Hour,
 			},
@@ -87,17 +87,17 @@ func TestParseJWT_InvalidToken(t *testing.T) {
 			errMessage: "signature is invalid",
 		},
 		{
-			name:        "empty token",
-			token:       "",
-			authService: testingAuthService(),
-			expectErr:   true,
-			errMessage:  "token contains an invalid number of segments",
+			name:       "empty token",
+			token:      "",
+			Service:    testingService(),
+			expectErr:  true,
+			errMessage: "token contains an invalid number of segments",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			claims, err := tc.authService.ParseJWT(tc.token)
+			claims, err := tc.Service.ParseJWT(tc.token)
 			if tc.expectErr {
 				require.Error(t, err)
 				if tc.errMessage != "" {
@@ -113,11 +113,11 @@ func TestParseJWT_InvalidToken(t *testing.T) {
 }
 
 func TestGenerateJWT_EmptySecret(t *testing.T) {
-	authService := &auth.AuthService{
+	Service := &auth.Service{
 		SecretKey:     "",
 		TokenDuration: 24 * time.Hour,
 	}
-	token, err := authService.GenerateJWT(123)
+	token, err := Service.GenerateJWT(123)
 	require.Error(t, err)
 	assert.Empty(t, token)
 	assert.EqualError(t, err, "secret key is empty")

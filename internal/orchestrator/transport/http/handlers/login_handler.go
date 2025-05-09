@@ -12,7 +12,7 @@ import (
 
 // LoginHandler - хендлер авторизации. Пользователь отправляет запрос POST /api/v1/login { "login": , "password": }
 // В ответ получае 200+OK и JWT токен
-func LoginHandler(authProvider auth.AuthProvider, exprRepo *repository.ExpressionModel) http.HandlerFunc {
+func LoginHandler(authProvider auth.Provider, exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request struct {
 			Login    string `json:"login"`

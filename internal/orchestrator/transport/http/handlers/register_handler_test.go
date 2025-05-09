@@ -33,11 +33,11 @@ func (m *MockPasswordHasher) Compare(hash, password string) bool {
 func TestRegister_InvalidRequestBody(t *testing.T) {
 	db, _, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	authService := &auth.AuthService{
+	Service := &auth.Service{
 		SecretKey:     "testsecret",
 		TokenDuration: time.Hour,
 	}
-	handler := handlers.Register(authService, exprRepo)
+	handler := handlers.Register(Service, exprRepo)
 
 	req, _ := http.NewRequest("POST", "/api/v1/register", io.NopCloser(bytes.NewBufferString("")))
 	req.Header.Set("Content-Type", "application/json")
@@ -62,11 +62,11 @@ func TestRegister_InvalidRequestBody(t *testing.T) {
 func TestRegister_UserAlreadyExists(t *testing.T) {
 	db, mock, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
-	authService := &auth.AuthService{
+	Service := &auth.Service{
 		SecretKey:     "testsecret",
 		TokenDuration: time.Hour,
 	}
-	handler := handlers.Register(authService, exprRepo)
+	handler := handlers.Register(Service, exprRepo)
 
 	mock.ExpectQuery("SELECT id, login, password_hash FROM users WHERE login = \\?").
 		WithArgs("existing_user").
@@ -96,7 +96,7 @@ func TestRegister_UserAlreadyExists(t *testing.T) {
 }
 
 func TestRegister_PasswordHashGenerationError(t *testing.T) {
-	mockAuth := &mock.MockAuthProvider{
+	mockAuth := &mock.AuthProvider{
 		GenerateHashFunc: func(password string) (string, error) {
 			return "", errors.New("mock hash generation error")
 		},
@@ -128,7 +128,7 @@ func TestRegister_PasswordHashGenerationError(t *testing.T) {
 }
 
 func TestRegister_CreateUserError(t *testing.T) {
-	mockAuth := &mock.MockAuthProvider{
+	mockAuth := &mock.AuthProvider{
 		GenerateHashFunc: func(password string) (string, error) {
 			return "hashed_password", nil
 		},
@@ -169,7 +169,7 @@ func TestRegister_CreateUserError(t *testing.T) {
 }
 
 func TestRegister_SuccessfulRegistration(t *testing.T) {
-	mockAuth := &mock.MockAuthProvider{
+	mockAuth := &mock.AuthProvider{
 		GenerateHashFunc: func(password string) (string, error) {
 			return "hashed_password", nil
 		},

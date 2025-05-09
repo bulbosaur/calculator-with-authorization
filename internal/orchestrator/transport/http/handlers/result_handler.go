@@ -13,7 +13,7 @@ import (
 )
 
 // ResultHandler выводит всю информацию по конкретному выражению
-func ResultHandler(authService *auth.AuthService, exprRepo *repository.ExpressionModel) http.HandlerFunc {
+func ResultHandler(Service *auth.Service, exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -29,7 +29,7 @@ func ResultHandler(authService *auth.AuthService, exprRepo *repository.Expressio
 
 		token := tokenParts[1]
 
-		claims, err := authService.ParseJWT(token)
+		claims, err := Service.ParseJWT(token)
 		if err != nil {
 			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
 			return

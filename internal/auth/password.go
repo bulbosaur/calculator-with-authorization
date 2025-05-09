@@ -7,22 +7,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// AuthService реализует AuthProvider
-type AuthService struct {
+// Service реализует AuthProvider
+type Service struct {
 	SecretKey     string
 	TokenDuration time.Duration
 }
 
-// NewAuthService создает экземпляр AuthService
-func NewAuthService(secretKey string, tokenDuration time.Duration) *AuthService {
-	return &AuthService{
+// NewService создает экземпляр Service
+func NewService(secretKey string, tokenDuration time.Duration) *Service {
+	return &Service{
 		SecretKey:     secretKey,
 		TokenDuration: tokenDuration,
 	}
 }
 
 // GenerateHash генирирует хэш из данного пароля
-func (s *AuthService) GenerateHash(password string) (string, error) {
+func (s *Service) GenerateHash(password string) (string, error) {
 	if password == "" {
 		return "", errors.New("password cannot be empty")
 	}
@@ -31,7 +31,7 @@ func (s *AuthService) GenerateHash(password string) (string, error) {
 }
 
 // Compare сравнивает хэш с паролем
-func (s *AuthService) Compare(hash, password string) bool {
+func (s *Service) Compare(hash, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

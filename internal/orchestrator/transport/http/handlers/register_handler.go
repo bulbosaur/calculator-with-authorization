@@ -11,7 +11,7 @@ import (
 
 // Register - регистрация пользователя. Он отправляет запрос POST /api/v1/register { "login": , "password": }
 // В ответ получаем 200+OK (в случае успеха) или ошибку
-func Register(authProvider auth.AuthProvider, exprRepo *repository.ExpressionModel) http.HandlerFunc {
+func Register(authProvider auth.Provider, exprRepo *repository.ExpressionModel) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request struct {
 			Login    string `json:"login"`

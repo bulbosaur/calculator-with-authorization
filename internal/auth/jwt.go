@@ -13,8 +13,8 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-// AuthProvider абстрагирует методы хэширования и работы с JWT
-type AuthProvider interface {
+// Provider абстрагирует методы хэширования и работы с JWT
+type Provider interface {
 	GenerateHash(password string) (string, error)
 	Compare(hash, password string) bool
 	GenerateJWT(userID int) (string, error)
@@ -22,7 +22,7 @@ type AuthProvider interface {
 }
 
 // GenerateJWT создает новый токен, подписанный секретным ключом
-func (s *AuthService) GenerateJWT(userID int) (string, error) {
+func (s *Service) GenerateJWT(userID int) (string, error) {
 	if s.SecretKey == "" {
 		return "", errors.New("secret key is empty")
 	}
@@ -37,7 +37,7 @@ func (s *AuthService) GenerateJWT(userID int) (string, error) {
 }
 
 // ParseJWT парсит токен в Claims и проверяет, что он вадилен
-func (s *AuthService) ParseJWT(tokenString string) (*Claims, error) {
+func (s *Service) ParseJWT(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(s.SecretKey), nil
 	})

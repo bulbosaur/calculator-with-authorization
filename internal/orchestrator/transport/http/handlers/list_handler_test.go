@@ -25,7 +25,7 @@ func setup() (*sql.DB, sqlmock.Sqlmock, error) {
 }
 
 func TestListHandler_MissingAuthHeader(t *testing.T) {
-	mockAuth := &mock.MockAuthProvider{}
+	mockAuth := &mock.AuthProvider{}
 	db, _, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
 	handler := handlers.ListHandler(mockAuth, exprRepo)
@@ -41,7 +41,7 @@ func TestListHandler_MissingAuthHeader(t *testing.T) {
 }
 
 func TestListHandler_InvalidAuthFormat(t *testing.T) {
-	mockAuth := &mock.MockAuthProvider{}
+	mockAuth := &mock.AuthProvider{}
 	db, _, _ := setup()
 	exprRepo := &repository.ExpressionModel{DB: db}
 	handler := handlers.ListHandler(mockAuth, exprRepo)
@@ -58,7 +58,7 @@ func TestListHandler_InvalidAuthFormat(t *testing.T) {
 }
 
 func TestListHandler_InvalidToken(t *testing.T) {
-	mockAuth := &mock.MockAuthProvider{
+	mockAuth := &mock.AuthProvider{
 		ParseJWTFunc: func(tokenString string) (*auth.Claims, error) {
 			return nil, jwt.ErrInvalidKey
 		},
@@ -80,7 +80,7 @@ func TestListHandler_InvalidToken(t *testing.T) {
 }
 
 func TestListHandler_DBError(t *testing.T) {
-	mockAuth := &mock.MockAuthProvider{
+	mockAuth := &mock.AuthProvider{
 		ParseJWTFunc: func(tokenString string) (*auth.Claims, error) {
 			return &auth.Claims{UserID: 1}, nil
 		},
@@ -106,7 +106,7 @@ func TestListHandler_DBError(t *testing.T) {
 }
 
 func TestListHandler_Success(t *testing.T) {
-	mockAuth := &mock.MockAuthProvider{
+	mockAuth := &mock.AuthProvider{
 		ParseJWTFunc: func(tokenString string) (*auth.Claims, error) {
 			return &auth.Claims{UserID: 1}, nil
 		},
@@ -149,7 +149,7 @@ func TestListHandler_Success(t *testing.T) {
 }
 
 func TestListHandler_EmptyResult(t *testing.T) {
-	mockAuth := &mock.MockAuthProvider{
+	mockAuth := &mock.AuthProvider{
 		ParseJWTFunc: func(tokenString string) (*auth.Claims, error) {
 			return &auth.Claims{UserID: 1}, nil
 		},
