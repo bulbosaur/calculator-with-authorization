@@ -248,3 +248,38 @@ func TestExecuteTask_OperationsWithDelays(t *testing.T) {
 		})
 	}
 }
+
+func TestNewGRPCAgent_UsesDefaults(t *testing.T) {
+	viper.Reset()
+
+	agent, err := newGRPCAgent()
+	assert.NoError(t, err)
+	assert.NotNil(t, agent)
+
+	target := agent.conn.Target()
+	assert.Equal(t, "localhost:50051", target)
+}
+
+func TestSendResult_WithErrorMessage(t *testing.T) {
+	srv, testServer := startTestServer()
+	defer srv.Stop()
+
+	conn, _ := grpc.NewClient("passthrough:///bufnet", grpc.WithContextDialer(func(ctx context.Context, _ string) (net.Conn, error) {
+		return lis.DialContext(ctx)
+	}), grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	agent := &GRPCAgent{
+		client: proto.NewTaskServiceClient(conn),
+		conn:   conn,
+	}
+
+	err := agent.sendResult(context.Background(), 1, 0, "division by zero")
+	assert.NoError(t, err)
+
+	select {
+	case req := <-testServer.received:
+		assert.Equal(t, "division by zero", req.ErrorMessage)
+	case <-time.After(3 * time.Second):
+		t.Fatal("Timeout waiting for result")
+	}
+}

@@ -91,7 +91,7 @@ go run ./cmd/agent/main.go
 ```bash
 go test -cover .\internal\agent\
 
-# ok        coverage: 67.9% of statements
+# ok        coverage: 82.9% of statements
 ```
 
 ```bash
@@ -128,18 +128,18 @@ go test -cover .\internal\repository\
 
 
 ```bash
-        github.com/bulbosaur/calculator-with-authorization/cmd/agent            coverage: 0.0% of statements
-?       github.com/bulbosaur/calculator-with-authorization/internal/models      [no test files]
+github.com/bulbosaur/calculator-with-authorization/cmd/agent            coverage: 0.0% of statements
         github.com/bulbosaur/calculator-with-authorization/config               coverage: 0.0% of statements
         github.com/bulbosaur/calculator-with-authorization/cmd/orchestrator             coverage: 0.0% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/agent       (cached)        coverage: 66.7% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/auth        (cached)        coverage: 89.5% of statements
+?       github.com/bulbosaur/calculator-with-authorization/internal/models      [no test files]
         github.com/bulbosaur/calculator-with-authorization/internal/mock                coverage: 0.0% of statements
         github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http         coverage: 0.0% of statements
         github.com/bulbosaur/calculator-with-authorization/proto                coverage: 0.0% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/service        0.541s  coverage: 88.6% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/grpc 0.177s  coverage: 67.9% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/handlers        0.547s    coverage: 65.3% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/middlewares     (cached)  coverage: 84.2% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/repository  0.642s  coverage: 63.2% of statements
+ok      github.com/bulbosaur/calculator-with-authorization/internal/agent       0.552s  coverage: 82.9% of statements
+ok      github.com/bulbosaur/calculator-with-authorization/internal/auth        0.665s  coverage: 90.0% of statements
+ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/service        (cached)        coverage: 88.6% of statements
+ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/grpc (cached)        coverage: 67.9% of statements
+ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/handlers        0.492s    coverage: 65.3% of statements
+ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/middlewares     0.366s    coverage: 84.2% of statements
+ok      github.com/bulbosaur/calculator-with-authorization/internal/repository  (cached)        coverage: 63.2% of statements
 ```

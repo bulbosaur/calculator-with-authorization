@@ -175,3 +175,22 @@ func TestWorkerNilTaskHandling(t *testing.T) {
 		t.Fatal("Timeout waiting for log message")
 	}
 }
+
+func TestWorker_RetryOnFailure(t *testing.T) {
+	mockClient := &mockTaskServiceClient{receiveTaskError: true}
+	agent := &GRPCAgent{client: mockClient}
+
+	logChan := make(chan string, 1)
+	log.SetOutput(&logWriter{logs: logChan})
+	defer log.SetOutput(os.Stderr)
+
+	Workers = 1
+	go agent.worker(1)
+
+	select {
+	case msg := <-logChan:
+		assert.Contains(t, msg, "task receiving error")
+	case <-time.After(3 * time.Second):
+		t.Fatal("Timeout waiting for retry log")
+	}
+}

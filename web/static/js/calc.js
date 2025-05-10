@@ -23,7 +23,7 @@ async function pollResult(taskId) {
       if (expr.status === "done") {
         resultDiv.innerText = 'Результат вычисления: ' + expr.result;
       } else if (expr.status === "failed") {
-        resultDiv.innerText = 'Ошибка вычисления: ' + expr.ErrorMessage;
+        resultDiv.innerText = 'Ошибка вычисления: ' + expr.error_message;
       } else {
         setTimeout(() => pollResult(taskId), 1000);
       }
