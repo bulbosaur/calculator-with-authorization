@@ -17,7 +17,7 @@ type Service struct {
 func NewService(secretKey string, tokenDuration time.Duration) *Service {
 	return &Service{
 		SecretKey:     secretKey,
-		TokenDuration: tokenDuration,
+		TokenDuration: tokenDuration * time.Hour,
 	}
 }
 

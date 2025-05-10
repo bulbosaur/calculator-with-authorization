@@ -6,7 +6,6 @@ import (
 
 	"github.com/bulbosaur/calculator-with-authorization/internal/auth"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,7 +18,6 @@ func testingService() *auth.Service {
 }
 
 func TestGenerateAndParseJWT(t *testing.T) {
-	viper.Set("jwt.token_duration", 24)
 	userID := 123
 
 	token, err := testingService().GenerateJWT(userID)
@@ -29,6 +27,9 @@ func TestGenerateAndParseJWT(t *testing.T) {
 	claims, err := testingService().ParseJWT(token)
 	require.NoError(t, err)
 	assert.Equal(t, userID, claims.UserID)
+
+	t.Logf("Expected: %v", time.Now().Add(24*time.Hour))
+	t.Logf("Actual: %v", claims.ExpiresAt.Time)
 	assert.WithinDuration(t, time.Now().Add(24*time.Hour), claims.ExpiresAt.Time, time.Minute)
 }
 

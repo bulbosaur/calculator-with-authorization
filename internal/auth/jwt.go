@@ -29,7 +29,7 @@ func (s *Service) GenerateJWT(userID int) (string, error) {
 	claims := &Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.TokenDuration * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.TokenDuration)),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -38,17 +38,18 @@ func (s *Service) GenerateJWT(userID int) (string, error) {
 
 // ParseJWT парсит токен в Claims и проверяет, что он вадилен
 func (s *Service) ParseJWT(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(s.SecretKey), nil
-	})
+	}, jwt.WithValidMethods([]string{"HS256"}))
 
 	if err != nil {
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		return claims, nil
+	if !token.Valid {
+		return nil, jwt.ErrInvalidKey
 	}
 
-	return nil, jwt.ErrInvalidKey
+	return claims, nil
 }
