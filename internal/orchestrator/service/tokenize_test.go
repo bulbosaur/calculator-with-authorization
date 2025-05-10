@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
+	"github.com/stretchr/testify/assert"
 )
 
 func equalTokens(a, b []models.Token) bool {
@@ -122,4 +123,15 @@ func TestTokenize(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestTokenize_WithInvalidCharacter(t *testing.T) {
+	_, err := tokenize("123$456")
+	assert.Equal(t, models.ErrorInvalidCharacter, err)
+}
+
+func TestTokenize_EmptyInput(t *testing.T) {
+	tokens, err := tokenize("")
+	assert.NoError(t, err)
+	assert.Empty(t, tokens)
 }

@@ -50,3 +50,13 @@ go test -cover .\internal\orchestrator\transport\http\handlers\
 
 # ok        coverage: 65.3% of statements
 ```
+```bash
+go test -cover .\internal\orchestrator\transport\grpc\
+
+# ok        coverage: 19.2% of statements
+```
+```bash
+go test -cover .\internal\orchestrator\service\ 
+
+# ok        coverage: 88.6% of statements
+```

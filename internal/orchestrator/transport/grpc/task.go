@@ -14,16 +14,16 @@ import (
 // TaskServer реализует gRPC-сервис для управления задачами
 type TaskServer struct {
 	proto.UnimplementedTaskServiceServer
-	exprRepo *repository.ExpressionModel
+	ExprRepo *repository.ExpressionModel
 }
 
 func newTaskServer(repo *repository.ExpressionModel) *TaskServer {
-	return &TaskServer{exprRepo: repo}
+	return &TaskServer{ExprRepo: repo}
 }
 
 // ReceiveTask обрабатывает запрос от агента на получение задачи
 func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest) (*proto.Task, error) {
-	task, id, err := ts.exprRepo.GetTask()
+	task, id, err := ts.ExprRepo.GetTask()
 	if err != nil {
 		log.Println("Failed to get task:", err)
 		return nil, status.Errorf(codes.Internal, "failed to get task: %v", err)
@@ -33,7 +33,7 @@ func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest
 		return nil, status.Error(codes.NotFound, "no tasks available")
 	}
 
-	ts.exprRepo.UpdateTaskStatus(id, models.StatusInProcess)
+	ts.ExprRepo.UpdateTaskStatus(id, models.StatusInProcess)
 
 	return &proto.Task{
 		Id:           int32(task.ID),
@@ -50,7 +50,7 @@ func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest
 
 // SubmitTaskResult обрабатывает результат выполнения задачи от агента
 func (ts *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTaskResultRequest) (*proto.SubmitTaskResultResponse, error) {
-	err := ts.exprRepo.UpdateTaskResult(
+	err := ts.ExprRepo.UpdateTaskResult(
 		int(req.TaskId),
 		req.Result,
 		req.ErrorMessage,
