@@ -29,7 +29,7 @@ func (s *Service) GenerateJWT(userID int) (string, error) {
 	claims := &Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.TokenDuration)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.TokenDuration * time.Hour)),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

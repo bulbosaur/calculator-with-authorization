@@ -9,6 +9,7 @@ import (
 
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/bulbosaur/calculator-with-authorization/proto"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -210,4 +211,40 @@ func TestExecuteTask_DivisionByZero(t *testing.T) {
 	assert.NoError(t, err, "Expected nil, but got error")
 	assert.Equal(t, models.ErrorDivisionByZero.Error(), errMsg, "Expected division by zero error message")
 	assert.Equal(t, 0.0, result, "Result should be 0")
+}
+
+func TestExecuteTask_OperationsWithDelays(t *testing.T) {
+	agent := &GRPCAgent{}
+	tests := []struct {
+		name           string
+		operation      string
+		arg1, arg2     float64
+		delayKey       string
+		expectedResult float64
+	}{
+		{"Addition", "+", 5, 3, "duration.TIME_ADDITION_MS", 8},
+		{"Subtraction", "-", 10, 7, "duration.TIME_SUBTRACTION_MS", 3},
+		{"Multiplication", "*", 4, 5, "duration.TIME_MULTIPLICATIONS_MS", 20},
+		{"Division", "/", 10, 2, "duration.TIME_DIVISIONS_MS", 5},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			viper.Set(tt.delayKey, 100)
+			task := &models.Task{
+				ID:        1,
+				Arg1:      tt.arg1,
+				Arg2:      tt.arg2,
+				Operation: tt.operation,
+			}
+			start := time.Now()
+			result, errMsg, err := agent.executeTask(context.Background(), task)
+			elapsed := time.Since(start)
+
+			assert.NoError(t, err)
+			assert.Empty(t, errMsg)
+			assert.Equal(t, tt.expectedResult, result)
+			assert.InDelta(t, 100, elapsed.Milliseconds(), 50)
+		})
+	}
 }

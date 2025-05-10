@@ -89,7 +89,7 @@ go run ./cmd/agent/main.go
 ```bash
 go test -cover .\internal\agent\
 
-# ok        coverage: 66.7% of statements
+# ok        coverage: 67.9% of statements
 ```
 
 ```bash
