@@ -310,3 +310,40 @@ func TestFullExpressionLifecycle(t *testing.T) {
 	assert.Equal(t, models.StatusResolved, expr.Status)
 	assert.Equal(t, float64(11), expr.Result)
 }
+
+func TestReceiveTask_DBError(t *testing.T) {
+	ts := setupTestServer(t)
+	defer ts.teardown(t)
+
+	ts.exprRepo.DB.Close()
+
+	conn, err := grpc.Dial(fmt.Sprintf("localhost:%s", ts.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	defer conn.Close()
+
+	client := proto.NewTaskServiceClient(conn)
+	_, err = client.ReceiveTask(context.Background(), &proto.GetTaskRequest{})
+	require.Error(t, err)
+	st, ok := status.FromError(err)
+	require.True(t, ok)
+	assert.Equal(t, codes.Internal, st.Code())
+}
+
+func TestSubmitTaskResult_InvalidTaskID(t *testing.T) {
+	ts := setupTestServer(t)
+	defer ts.teardown(t)
+
+	conn, err := grpc.Dial(fmt.Sprintf("localhost:%s", ts.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	defer conn.Close()
+
+	client := proto.NewTaskServiceClient(conn)
+	_, err = client.SubmitTaskResult(context.Background(), &proto.SubmitTaskResultRequest{
+		TaskId: -1,
+		Result: 7.0,
+	})
+	require.Error(t, err)
+	st, ok := status.FromError(err)
+	require.True(t, ok)
+	assert.Equal(t, codes.InvalidArgument, st.Code())
+}

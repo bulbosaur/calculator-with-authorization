@@ -5,33 +5,32 @@ import (
 	"log"
 	"net"
 
-	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
+	"github.com/bulbosaur/calculator-with-authorization/internal/models"
 	"github.com/bulbosaur/calculator-with-authorization/proto"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
 
 // RunGRPCOrchestrator запускает gRPC сервер оркестратора
-func RunGRPCOrchestrator(exprRepo *repository.ExpressionModel) {
+func RunGRPCOrchestrator(exprRepo models.ExpressionRepository) error {
 	host := viper.GetString("server.GRPC_HOST")
 	port := viper.GetString("server.GRPC_PORT")
 	addr := fmt.Sprintf("%s:%s", host, port)
 
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return fmt.Errorf("failed to listen: %v", err)
 	}
 
 	s := grpc.NewServer(
 		grpc.MaxRecvMsgSize(10*1024*1024),
 		grpc.MaxSendMsgSize(10*1024*1024),
 	)
-
 	proto.RegisterTaskServiceServer(s, newTaskServer(exprRepo))
-
-	log.Print("Starting gRPC server...")
 	log.Printf("gRPC server listening on %s", addr)
+
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		return fmt.Errorf("failed to serve: %v", err)
 	}
+	return nil
 }

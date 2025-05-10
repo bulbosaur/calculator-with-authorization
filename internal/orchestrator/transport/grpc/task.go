@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
-	"github.com/bulbosaur/calculator-with-authorization/internal/repository"
 	"github.com/bulbosaur/calculator-with-authorization/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,10 +13,10 @@ import (
 // TaskServer реализует gRPC-сервис для управления задачами
 type TaskServer struct {
 	proto.UnimplementedTaskServiceServer
-	ExprRepo *repository.ExpressionModel
+	ExprRepo models.ExpressionRepository
 }
 
-func newTaskServer(repo *repository.ExpressionModel) *TaskServer {
+func newTaskServer(repo models.ExpressionRepository) *TaskServer {
 	return &TaskServer{ExprRepo: repo}
 }
 
@@ -50,6 +49,10 @@ func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest
 
 // SubmitTaskResult обрабатывает результат выполнения задачи от агента
 func (ts *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTaskResultRequest) (*proto.SubmitTaskResultResponse, error) {
+	if req.TaskId <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "invalid task ID")
+	}
+
 	err := ts.ExprRepo.UpdateTaskResult(
 		int(req.TaskId),
 		req.Result,
@@ -60,6 +63,5 @@ func (ts *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTas
 		return &proto.SubmitTaskResultResponse{Success: false},
 			status.Errorf(codes.Internal, "failed to update task result: %v", err)
 	}
-
 	return &proto.SubmitTaskResultResponse{Success: true}, nil
 }

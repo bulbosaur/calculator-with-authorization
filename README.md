@@ -105,7 +105,7 @@ go test -cover .\internal\orchestrator\transport\http\handlers\
 ```bash
 go test -cover .\internal\orchestrator\transport\grpc\
 
-# ok        coverage: 34.6% of statements
+# ok        coverage: 46.4% of statements
 ```
 ```bash
 go test -cover .\internal\orchestrator\service\ 

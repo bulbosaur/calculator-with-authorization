@@ -43,6 +43,16 @@ type Expression struct {
 	ErrorMessage string  `json:"error_message"`
 }
 
+// ExpressionRepository — интерфейс для работы с задачами и выражениями
+type ExpressionRepository interface {
+	GetTask() (*Task, int, error)
+	UpdateTaskResult(id int, result float64, err string) error
+	GetExpression(id int) (*Expression, error)
+	Insert(expr string, userID int) (int, error)
+	UpdateStatus(id int, status string)
+	UpdateTaskStatus(id int, status string)
+}
+
 // RegisteredExpression - структура ответа, возвращаемого при регистрации выражения в оркестраторе
 type RegisteredExpression struct {
 	ID int `json:"id"`

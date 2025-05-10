@@ -27,5 +27,9 @@ func main() {
 	defer db.Close()
 
 	go orchestratorHTTP.RunHTTPOrchestrator(ExprRepo)
-	orchestratorGRPC.RunGRPCOrchestrator(ExprRepo)
+	err = orchestratorGRPC.RunGRPCOrchestrator(ExprRepo)
+
+	if err != nil {
+		log.Fatalf("Server failed: %v", err)
+	}
 }
