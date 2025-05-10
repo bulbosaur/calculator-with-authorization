@@ -249,3 +249,64 @@ func TestExpressionStatusUpdate(t *testing.T) {
 	assert.Equal(t, models.StatusResolved, expr.Status)
 	assert.Equal(t, float64(11), expr.Result)
 }
+
+func TestUpdateExpressionStatusOnError(t *testing.T) {
+	ts := setupTestServer(t)
+	defer ts.teardown(t)
+
+	exprID, _ := ts.exprRepo.Insert("5/0", 1)
+	err := orchestrator.Calc("5/0", exprID, ts.exprRepo)
+	require.NoError(t, err)
+
+	conn, _ := grpc.Dial(fmt.Sprintf("localhost:%s", ts.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	client := proto.NewTaskServiceClient(conn)
+
+	resp, _ := client.ReceiveTask(context.Background(), &proto.GetTaskRequest{})
+	client.SubmitTaskResult(context.Background(), &proto.SubmitTaskResultRequest{
+		TaskId:       resp.Id,
+		Result:       0,
+		ErrorMessage: models.ErrorDivisionByZero.Error(),
+	})
+
+	expr, _ := ts.exprRepo.GetExpression(exprID)
+	assert.Equal(t, models.StatusFailed, expr.Status)
+	assert.Equal(t, models.ErrorDivisionByZero.Error(), expr.ErrorMessage)
+}
+
+func TestFullExpressionLifecycle(t *testing.T) {
+	ts := setupTestServer(t)
+	defer ts.teardown(t)
+
+	exprID, _ := ts.exprRepo.Insert("3+4*2", 1)
+	err := orchestrator.Calc("3+4*2", exprID, ts.exprRepo)
+	require.NoError(t, err)
+
+	conn, _ := grpc.Dial(fmt.Sprintf("localhost:%s", ts.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	client := proto.NewTaskServiceClient(conn)
+
+	var taskIDs []int32
+	for {
+		resp, err := client.ReceiveTask(context.Background(), &proto.GetTaskRequest{})
+		if err != nil {
+			break
+		}
+		taskIDs = append(taskIDs, resp.Id)
+
+		var result float64
+		switch resp.Operation {
+		case "*":
+			result = resp.Arg1 * resp.Arg2
+		case "+":
+			result = resp.Arg1 + resp.Arg2
+		}
+
+		_, _ = client.SubmitTaskResult(context.Background(), &proto.SubmitTaskResultRequest{
+			TaskId: resp.Id,
+			Result: result,
+		})
+	}
+
+	expr, _ := ts.exprRepo.GetExpression(exprID)
+	assert.Equal(t, models.StatusResolved, expr.Status)
+	assert.Equal(t, float64(11), expr.Result)
+}
