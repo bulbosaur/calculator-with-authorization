@@ -1,5 +1,11 @@
 # calculator-with-authorization
 
+## О проекте
+
+Распределённый вычислитель арифметических выражений является итоговым проектом для обучающего курса Yandex Lyceum Программирование на Go | 24
+
+[Web-calculator-golang](https://github.com/bulbosaur/web-calculator-golang) - предыдущая версия
+
 ## GUI
 
 Если переменныем окружения не были изменены, графический интерфейс доступен по адресу ```http://localhost:8080```
@@ -14,6 +20,52 @@
 
 - Go версии ```1.23``` или новее
 - Дополнительные библиотеки (указаны в ```go.mod```)
+
+## Установка
+
+1. Клонирование репозитория
+
+```bash
+git clone https://github.com/bulbosaur/calculator-with-authorization
+```
+
+2. Установка зависимостей
+
+```bash
+go mod tidy
+```
+
+3. Запуск сервера из репозитория проекта
+
+Необходимо находиться в корневой директории проекта (web-calculator-golang)
+
+Для запуска двух сервисов Вам потребуется 2 терминала. В **Visual Studio Code** удобно открыть сплит сочетанием клавиш ```Ctrl+Shift+5```.
+
+![Скрин из vscode](./img/image3.png)
+
+- В первом необходимо ввести команду:
+
+```bash
+go run ./cmd/orchestrator/main.go
+```
+Дождитесь запуска сервера, при первом старте это может занять довольно много времени:
+
+```bash
+2025/05/10 17:08:39 Starting server...
+2025/05/10 17:08:39 Configuration: HTTP_HOST=localhost, HTTP_PORT=8080, GRPC_HOST=localhost, GRPC_PORT=50051, TIME_ADDITION_MS=100, TIME_SUBTRACTION_MS=100, TIME_MULTIPLICATIONS_MS=100, TIME_DIVISIONS_MS=100, DATABASE_PATH=./db/calc.db, jwt.token_duration=24
+2025/05/10 17:08:39 Database path: ./db/calc.db
+2025/05/10 17:08:39 Successful connection to the database
+2025/05/10 17:08:39 HTTP orchestrator starting on localhost:8080
+2025/05/10 17:08:39 Starting gRPC server...
+2025/05/10 17:08:39 gRPC server listening on localhost:50051
+```
+
+- А во втором:
+
+```bash
+go run ./cmd/agent/main.go
+```
+
 
 ## Переменные окружения
 
@@ -53,7 +105,7 @@ go test -cover .\internal\orchestrator\transport\http\handlers\
 ```bash
 go test -cover .\internal\orchestrator\transport\grpc\
 
-# ok        coverage: 19.2% of statements
+# ok        coverage: 34.6% of statements
 ```
 ```bash
 go test -cover .\internal\orchestrator\service\ 

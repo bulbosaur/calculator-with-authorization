@@ -16,7 +16,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 	_ "modernc.org/sqlite"
 )
 
@@ -116,4 +118,134 @@ func TestReceiveTask(t *testing.T) {
 	task, err := ts.exprRepo.GetTaskByID(int(resp.Id))
 	require.NoError(t, err)
 	assert.Equal(t, models.StatusInProcess, task.Status)
+}
+
+func TestSubmitTaskResult(t *testing.T) {
+	ts := setupTestServer(t)
+	defer ts.teardown(t)
+
+	exprID, err := ts.exprRepo.Insert("3+4", 1)
+	require.NoError(t, err)
+
+	err = orchestrator.Calc("3+4", exprID, ts.exprRepo)
+	require.NoError(t, err)
+
+	conn, err := grpc.Dial(fmt.Sprintf("localhost:%s", ts.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	defer conn.Close()
+
+	client := proto.NewTaskServiceClient(conn)
+	resp, err := client.ReceiveTask(context.Background(), &proto.GetTaskRequest{})
+	require.NoError(t, err)
+
+	_, err = client.SubmitTaskResult(context.Background(), &proto.SubmitTaskResultRequest{
+		TaskId: resp.Id,
+		Result: 7.0,
+	})
+	require.NoError(t, err)
+
+	task, err := ts.exprRepo.GetTaskByID(int(resp.Id))
+	require.NoError(t, err)
+	assert.Equal(t, models.StatusResolved, task.Status)
+	assert.Equal(t, float64(7), task.Result)
+
+	expr, err := ts.exprRepo.GetExpression(exprID)
+	require.NoError(t, err)
+	assert.Equal(t, models.StatusResolved, expr.Status)
+	assert.Equal(t, float64(7), expr.Result)
+}
+
+func TestSubmitTaskError(t *testing.T) {
+	ts := setupTestServer(t)
+	defer ts.teardown(t)
+
+	exprID, err := ts.exprRepo.Insert("5/0", 1)
+	require.NoError(t, err)
+	err = orchestrator.Calc("5/0", exprID, ts.exprRepo)
+	require.NoError(t, err)
+
+	conn, err := grpc.Dial(fmt.Sprintf("localhost:%s", ts.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	defer conn.Close()
+
+	client := proto.NewTaskServiceClient(conn)
+	resp, err := client.ReceiveTask(context.Background(), &proto.GetTaskRequest{})
+	require.NoError(t, err)
+
+	_, err = client.SubmitTaskResult(context.Background(), &proto.SubmitTaskResultRequest{
+		TaskId:       resp.Id,
+		Result:       0,
+		ErrorMessage: models.ErrorDivisionByZero.Error(),
+	})
+	require.NoError(t, err)
+
+	expr, err := ts.exprRepo.GetExpression(exprID)
+	require.NoError(t, err)
+	assert.Equal(t, models.StatusFailed, expr.Status)
+	assert.Equal(t, models.ErrorDivisionByZero.Error(), expr.ErrorMessage)
+}
+
+func TestNoTasksAvailable(t *testing.T) {
+	ts := setupTestServer(t)
+	defer ts.teardown(t)
+
+	conn, err := grpc.Dial(fmt.Sprintf("localhost:%s", ts.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	defer conn.Close()
+
+	client := proto.NewTaskServiceClient(conn)
+
+	_, err = client.ReceiveTask(context.Background(), &proto.GetTaskRequest{})
+	require.Error(t, err)
+
+	st, ok := status.FromError(err)
+	require.True(t, ok)
+	assert.Equal(t, codes.NotFound, st.Code())
+}
+
+func TestExpressionStatusUpdate(t *testing.T) {
+	ts := setupTestServer(t)
+	defer ts.teardown(t)
+
+	exprID, err := ts.exprRepo.Insert("3+4*2", 1)
+	require.NoError(t, err)
+	err = orchestrator.Calc("3+4*2", exprID, ts.exprRepo)
+	require.NoError(t, err)
+
+	conn, err := grpc.Dial(fmt.Sprintf("localhost:%s", ts.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	defer conn.Close()
+
+	client := proto.NewTaskServiceClient(conn)
+
+	var taskIDs []int32
+
+	for {
+		resp, err := client.ReceiveTask(context.Background(), &proto.GetTaskRequest{})
+		if err != nil {
+			break
+		}
+		taskIDs = append(taskIDs, resp.Id)
+
+		var result float64
+		switch resp.Operation {
+		case "*":
+			result = resp.Arg1 * resp.Arg2
+		case "+":
+			result = resp.Arg1 + resp.Arg2
+		default:
+			t.Fatalf("Unknown operation: %s", resp.Operation)
+		}
+
+		_, submitErr := client.SubmitTaskResult(context.Background(), &proto.SubmitTaskResultRequest{
+			TaskId: resp.Id,
+			Result: result,
+		})
+		require.NoError(t, submitErr)
+	}
+
+	expr, err := ts.exprRepo.GetExpression(exprID)
+	require.NoError(t, err)
+	assert.Equal(t, models.StatusResolved, expr.Status)
+	assert.Equal(t, float64(11), expr.Result)
 }
