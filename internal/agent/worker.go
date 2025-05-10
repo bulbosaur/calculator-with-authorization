@@ -31,8 +31,12 @@ func (a *GRPCAgent) worker(id int) {
 		}
 
 		result, errorMessage, err := a.executeTask(ctx, task)
-		if err != nil && task.ID != 0 {
-			log.Printf("Worker %d: execution error task ID-%d: %v", id, task.ID, err)
+		if err != nil {
+			if task.ID != 0 {
+				log.Printf("Worker %d: execution error task ID-%d: %v", id, task.ID, err)
+			} else {
+				log.Printf("Worker %d: received invalid task (ID=0): %v", id, err)
+			}
 			time.Sleep(interval)
 			<-sem
 			continue

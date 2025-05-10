@@ -11,7 +11,7 @@ import (
 )
 
 // AuthMiddleware обеспечивает JWT-аутентификацию для API
-func AuthMiddleware(Service *auth.Service) mux.MiddlewareFunc {
+func AuthMiddleware(Service auth.Provider) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
