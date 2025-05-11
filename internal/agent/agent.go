@@ -138,6 +138,9 @@ func (a *GRPCAgent) executeTask(ctx context.Context, task *models.Task) (float64
 }
 
 func (a *GRPCAgent) sendResult(ctx context.Context, taskID int, result float64, errorMessage string) error {
+	Mu.Lock()
+	defer Mu.Unlock()
+
 	_, err := a.Client.SubmitTaskResult(context.Background(), &proto.SubmitTaskResultRequest{
 		TaskId:       int32(taskID),
 		Result:       result,

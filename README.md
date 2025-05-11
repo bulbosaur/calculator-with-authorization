@@ -122,7 +122,7 @@ go test -cover .\internal\orchestrator\transport\http\middlewares\
 ```bash
 go test -cover .\internal\repository\
 
-# ok        coverage: 70.0% of statements
+# ok        coverage: 80.5% of statements
 ```
 
 

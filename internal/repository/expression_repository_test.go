@@ -53,3 +53,25 @@ func TestSetResult(t *testing.T) {
 	expr, _ := repo.GetExpression(exprID)
 	assert.Equal(t, 3.0, expr.Result)
 }
+
+func TestGetTaskStatus_InvalidTaskID(t *testing.T) {
+	teardown := setupTestDB(t)
+	defer teardown()
+
+	status, result, err := repo.GetTaskStatus(999)
+	assert.Error(t, err)
+	assert.Equal(t, "sql: no rows in result set", err.Error())
+	assert.Empty(t, status)
+	assert.Zero(t, result)
+}
+
+func TestUpdateStatus_NonExistentExpression(t *testing.T) {
+	teardown := setupTestDB(t)
+	defer teardown()
+
+	repo.UpdateStatus(999, models.StatusResolved)
+
+	expr, err := repo.GetExpression(999)
+	assert.Error(t, err)
+	assert.Nil(t, expr)
+}

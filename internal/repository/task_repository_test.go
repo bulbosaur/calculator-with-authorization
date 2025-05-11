@@ -34,6 +34,23 @@ func TestInsertAndGetTask(t *testing.T) {
 	assert.Equal(t, task.Status, dbTask.Status)
 }
 
+func TestUpdateTaskResult_InvalidExpressionID(t *testing.T) {
+	teardown := setupTestDB(t)
+	defer teardown()
+
+	_, err := repo.DB.Exec("INSERT INTO tasks (expressionID, arg1, arg2, operation, status) VALUES (?, ?, ?, ?, ?)",
+		999, 1, 2, "+", models.StatusWait)
+	assert.NoError(t, err)
+
+	var taskID int
+	err = repo.DB.QueryRow("SELECT id FROM tasks WHERE expressionID = ?", 999).Scan(&taskID)
+	assert.NoError(t, err)
+
+	err = repo.UpdateTaskResult(taskID, 3, "")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "expression with ID 999 does not exist")
+}
+
 func TestUpdateTaskResult(t *testing.T) {
 	teardown := setupTestDB(t)
 	defer teardown()
@@ -115,4 +132,26 @@ func TestGetTaskStatus(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, models.StatusResolved, status)
 	assert.Equal(t, 56.0, result)
+}
+
+func TestUpdateTaskResult_WithError(t *testing.T) {
+	teardown := setupTestDB(t)
+	defer teardown()
+
+	exprID, _ := repo.Insert("5/0", 1)
+	task := &models.Task{
+		ExpressionID: exprID,
+		Arg1:         5,
+		Arg2:         0,
+		Operation:    "/",
+		Status:       models.StatusWait,
+	}
+	taskID, _ := repo.InsertTask(task)
+
+	err := repo.UpdateTaskResult(taskID, 0, models.ErrorDivisionByZero.Error())
+	assert.NoError(t, err)
+
+	expr, _ := repo.GetExpression(exprID)
+	assert.Equal(t, models.StatusFailed, expr.Status)
+	assert.Equal(t, models.ErrorDivisionByZero.Error(), expr.ErrorMessage)
 }

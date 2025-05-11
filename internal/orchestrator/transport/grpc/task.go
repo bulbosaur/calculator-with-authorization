@@ -2,6 +2,7 @@ package orchestrator
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/bulbosaur/calculator-with-authorization/internal/models"
@@ -49,19 +50,17 @@ func (ts *TaskServer) ReceiveTask(ctx context.Context, req *proto.GetTaskRequest
 
 // SubmitTaskResult обрабатывает результат выполнения задачи от агента
 func (ts *TaskServer) SubmitTaskResult(ctx context.Context, req *proto.SubmitTaskResultRequest) (*proto.SubmitTaskResultResponse, error) {
+	var err error = errors.New("")
 	if req.TaskId <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "invalid task ID")
 	}
 
-	err := ts.ExprRepo.UpdateTaskResult(
-		int(req.TaskId),
-		req.Result,
-		req.ErrorMessage,
-	)
-	if err != nil {
-		log.Printf("Failed to update task result: %v", err)
-		return &proto.SubmitTaskResultResponse{Success: false},
-			status.Errorf(codes.Internal, "failed to update task result: %v", err)
+	for err != nil {
+		err = ts.ExprRepo.UpdateTaskResult(
+			int(req.TaskId),
+			req.Result,
+			req.ErrorMessage,
+		)
 	}
 	return &proto.SubmitTaskResultResponse{Success: true}, nil
 }

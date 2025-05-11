@@ -34,3 +34,23 @@ func TestGetNonexistentUser(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, models.ErrorUserNotFound, err)
 }
+
+func TestCreateUser_DuplicateLogin(t *testing.T) {
+	teardown := setupTestDB(t)
+	defer teardown()
+
+	user1 := &models.User{
+		Login:        "testuser",
+		PasswordHash: "hash1",
+	}
+	_, err := repo.CreateUser(user1)
+	assert.NoError(t, err)
+
+	user2 := &models.User{
+		Login:        "testuser",
+		PasswordHash: "hash2",
+	}
+	_, err = repo.CreateUser(user2)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "UNIQUE constraint failed")
+}

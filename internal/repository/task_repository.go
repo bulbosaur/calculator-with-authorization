@@ -10,6 +10,9 @@ import (
 
 // InsertTask записывает мат выражение в таблицу БД
 func (e *ExpressionModel) InsertTask(task *models.Task) (int, error) {
+	e.Mu.Lock()
+	defer e.Mu.Unlock()
+
 	query := `
         INSERT INTO tasks (expressionID, arg1, arg2, prev_task_id1, prev_task_id2, operation, status, result)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -137,6 +140,9 @@ func (e *ExpressionModel) UpdateTaskStatus(taskID int, status string) {
 
 // UpdateTaskResult обновляет результат таски в базе и если все остальные действия выраженрия выполены, пишет окончательный ответ
 func (e *ExpressionModel) UpdateTaskResult(taskID int, result float64, errorMessage string) error {
+	e.Mu.Lock()
+	defer e.Mu.Unlock()
+
 	_, err := e.DB.Exec(
 		"UPDATE tasks SET status = ?, result = ?, error_message = ? WHERE id = ?",
 		models.StatusResolved,
@@ -160,18 +166,26 @@ func (e *ExpressionModel) UpdateTaskResult(taskID int, result float64, errorMess
 		return fmt.Errorf("failed to get expression ID: %v", err)
 	}
 
+	var count int
+	err = e.DB.QueryRow("SELECT COUNT(*) FROM expressions WHERE id = ?", exprID).Scan(&count)
+	if err != nil {
+		return fmt.Errorf("failed to check expression existence: %v", err)
+	}
+	if count == 0 {
+		return fmt.Errorf("expression with ID %d does not exist", exprID)
+	}
+
 	completed, err := e.AreAllTasksCompleted(exprID)
 	if err != nil {
 		return fmt.Errorf("failed to check tasks completion: %v", err)
 	}
 
 	if completed {
-		finalResult, errorMessage, err := e.CalculateExpressionResult(exprID)
+		finalResult, errorMsg, err := e.CalculateExpressionResult(exprID)
 		if err != nil {
 			return fmt.Errorf("failed to calculate expression result: %v", err)
 		}
-
-		err = e.UpdateExpressionResult(exprID, finalResult, errorMessage)
+		err = e.UpdateExpressionResult(exprID, finalResult, errorMsg)
 		if err != nil {
 			return fmt.Errorf("failed to update expression result: %v", err)
 		}
