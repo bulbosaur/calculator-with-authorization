@@ -119,59 +119,59 @@ go run ./cmd/agent/main.go
 
 ```bash
 # ./config/.env
-server.ORC_HOST=example.com
-server.ORC_PORT=8000
+jwt.secret_key="your_secret_key_here"
+jwt.token_duration=24
 
-duration.TIME_ADDITION_MS=300
-duration.TIME_SUBTRACTION_MS=300
-duration.TIME_MULTIPLICATIONS_MS=300
-duration.TIME_DIVISIONS_MS=300
+server.HTTP_HOST="localhost"
+server.HTTP_PORT=8080
+server.GRPC_HOST="localhost"
+server.GRPC_PORT=50051
 
-DATABASE_PATH=C:/path/to/database.db
+duration.TIME_ADDITION_MS=1
+duration.TIME_SUBTRACTION_MS=1
+duration.TIME_MULTIPLICATIONS_MS=1
+duration.TIME_DIVISIONS_MS=1
 
-worker.COMPUTING_POWER=1
+worker.COMPUTING_POWER=15
+
+DATABASE_PATH=./db/calc.db
+
 ```
 
 - в **PowerShell** перед запуском программы:
 
 ``` bash
-$env:SERVER_ORC_HOST = "example.com"
-$env:SERVER_ORC_PORT = "8000"
+$env:server.HTTP_HOST = "example.com"
+$env:server.HTTP_PORT = "8000"
 
-$env:DURATION_TIME_ADDITION_MS       = "300"
-$env:DURATION_TIME_SUBTRACTION_MS    = "300"
-$env:DURATION_TIME_MULTIPLICATIONS_MS = "300"
-$env:DURATION_TIME_DIVISIONS_MS      = "300"
+$env:duration.TIME_ADDITION_MS       = "300"
+$env:duration.TIME_SUBTRACTION_MS   = "300"
+$env:duration.TIME_MULTIPLICATIONS_MS = "300"
+$env:duration.TIME_DIVISIONS_MS      = "300"
 
 $env:DATABASE_PATH = "C:/path/to/database.db"
 
-$env:WORKER_COMPUTING_POWER = "1"
+$env:worker.COMPUTING_POWER = "1"
 ```
 
 - В терминале для **Linux/MacOS**:
 
 ``` bash
-export SERVER_ORC_HOST=example.com
-export SERVER_ORC_PORT=8000
-export DURATION_TIME_ADDITION_MS=300
-export DURATION_TIME_SUBTRACTION_MS=300
-export DURATION_TIME_MULTIPLICATIONS_MS=300
-export DURATION_TIME_DIVISIONS_MS=300
+export server.HTTP_HOST=example.com
+export server.HTTP_PORT=8000
+export duration.TIME_ADDITION_MS=300
 export DATABASE_PATH=/path/to/database.db
-export WORKER_COMPUTING_POWER=1
+export worker.COMPUTING_POWER=1
 ```
 
 - Для **Windows** (CMD):
 
 ``` bash
-   set SERVER_ORC_HOST=example.com
-   set SERVER_ORC_PORT=8000
-   set DURATION_TIME_ADDITION_MS=300
-   set DURATION_TIME_SUBTRACTION_MS=300
-   set DURATION_TIME_MULTIPLICATIONS_MS=300
-   set DURATION_TIME_DIVISIONS_MS=300
+   set server.HTTP_HOST=example.com
+   set server.HTTP_PORT=8000
+   set duration.TIME_ADDITION_MS=300
    set DATABASE_PATH=C:\path\to\database.db
-   set WORKER_COMPUTING_POWER=1
+   set worker.COMPUTING_POWER=1
 ```
 
 ## API
