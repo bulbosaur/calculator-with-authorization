@@ -10,6 +10,7 @@ import (
 // Mu - мьютекс в рамках микросервиса данного агента
 var Mu sync.Mutex
 
+// Worker изолированное выполняет свою задачу по вычислению
 func (a *GRPCAgent) Worker(id int) {
 	sem := make(chan struct{}, Workers)
 	interval := 1 * time.Second

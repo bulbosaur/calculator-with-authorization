@@ -57,7 +57,8 @@ func InitDB(path string) (*sql.DB, error) {
 		operation TEXT NOT NULL,
 		status TEXT,
 		result FLOAT,
-		error_message TEXT DEFAULT ""
+		error_message TEXT DEFAULT "",
+		FOREIGN KEY(expressionID) REFERENCES expressions(id)
 	);`
 	_, err = db.Exec(createTasks)
 	if err != nil {
