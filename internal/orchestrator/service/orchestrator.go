@@ -7,6 +7,9 @@ import (
 
 // Calc вызывает токенизацию выражения, записывает его в RPN. а затем в параллельных горутинах подсчитывает значения выражений в скобках
 func Calc(stringExpression string, id int, taskRepo *repository.ExpressionModel) error {
+	taskRepo.Mu.Lock()
+	defer taskRepo.Mu.Unlock()
+
 	expression, err := tokenize(stringExpression)
 	if err != nil {
 		return err
