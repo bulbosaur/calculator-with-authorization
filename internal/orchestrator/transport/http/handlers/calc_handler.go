@@ -35,9 +35,13 @@ func RegHandler(exprRepo *repository.ExpressionModel) http.HandlerFunc {
 		id, err := exprRepo.Insert(request.Expression, userID)
 		if err != nil {
 			log.Printf("something went wrong while creating a record in the database. %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(models.ErrorResponse{
+				Error:        "something went wrong",
+				ErrorMessage: "an error occurred while writing to the database",
+			})
 			return
 		}
-		log.Printf("Expression ID-%d has been registered", id)
 
 		err = orchestrator.Calc(request.Expression, id, exprRepo)
 		if err != nil {
