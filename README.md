@@ -357,7 +357,7 @@ go test -cover .\internal\agent\
 ```bash
 go test -cover .\internal\auth\
 
-# ok        coverage: 89.5% of statements
+# ok        coverage: 90.0% of statements
 ```
 ```bash
 go test -cover .\internal\orchestrator\transport\http\handlers\
@@ -367,12 +367,12 @@ go test -cover .\internal\orchestrator\transport\http\handlers\
 ```bash
 go test -cover .\internal\orchestrator\transport\grpc\
 
-# ok        coverage: 67.9% of statements
+# ok        coverage: 74.1% of statements
 ```
 ```bash
 go test -cover .\internal\orchestrator\service\ 
 
-# ok        coverage: 88.6% of statements
+# ok        coverage: 89.0% of statements
 ```
 ```bash
 go test -cover .\internal\orchestrator\transport\http\middlewares\
