@@ -8,6 +8,8 @@
 
 ## Принцип работы
 
+calculator-with-authorization предоставляет сервис калькулятора с JWT-аутентификацией. Пользователи могут регистрироваться, входить в систему, отправлять математические выражения для вычисления и просматривать историю своих вычислений. Обработка выражений выполняется асинхронно, результаты сохраняются в базу данных.
+
 ![Архитектура](./img/map.png)
 
 ## GUI
@@ -89,6 +91,77 @@ go run ./cmd/agent/main.go
 | ```worker.COMPUTING_POWER```           | Количество горутин, выполняющих вычисления          | 5                     |
 | ```jwt.secret_key```                   | Используется для создания цифровой подписи токена   | your_secret_key_here  |
 | ```jwt.token_duration```               | Время жизни токена                                  | 24                    |
+
+## API
+
+### Эндпоинты
+
+#### 1. Регистрация пользователя
+- Метод : ```POST```
+- URL : ```/api/v1/register```
+- Тело запроса:
+```bash
+{
+  "login": "sobaka",
+  "password": "Dog666God"
+}
+```
+- Ответы:
+```bash
+# 201 Created
+
+{"message":"User created successfully","user_id":2}
+```
+
+```bash
+# 409 Conflict
+
+{"error":"Conflict","error_message":"User already exists"}
+```
+
+#### 2. Авторизация пользователя
+- Метод : ```POST```
+- URL : ```/api/v1/login```
+- Тело запроса:
+```bash
+{
+  "login": "sobaka",
+  "password": "Dog666God"
+}
+```
+- Ответы:
+```bash
+# 200 OK
+
+{"message":"Authentication successful","token":"token"}
+```
+```bash
+# 401 Unauthorized
+
+{"error":"Unauthorized","error_message":"Invalid password"}
+```
+```bash
+# 401 Unauthorized
+
+{"error":"Unauthorized","error_message":"user not found"}
+```
+
+#### 3. Отправка выражения
+- Метод : ```POST```
+- URL : ```/api/v1/calculate```
+- Заголовки: ```Authorization: Bearer JWT_TOKEN```
+- Тело запроса:
+```bash
+{
+  "expression": "2+2"
+}
+```
+- Ответы:
+```bash
+# 201 Created
+
+{"id":5}
+```
 
 ## Тестирование
 

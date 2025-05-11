@@ -86,11 +86,12 @@ func checkEmptyBrackets(tokens []models.Token) bool {
 }
 
 func checkMissingOperand(tokens []models.Token) bool {
-	for i, token := range tokens {
-		if i == len(tokens)-1 {
-			break
+	for i := 0; i < len(tokens); i++ {
+		if !tokens[i].IsNumber && (i == len(tokens)-1 || (!tokens[i+1].IsNumber && tokens[i+1].Value != "(")) {
+			return false
 		}
-		if token.IsNumber && tokens[i+1].IsNumber {
+
+		if !tokens[i].IsNumber && (i == 0 || (!tokens[i-1].IsNumber && tokens[i-1].Value != ")")) {
 			return false
 		}
 	}
