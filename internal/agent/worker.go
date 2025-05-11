@@ -10,7 +10,7 @@ import (
 // Mu - мьютекс в рамках микросервиса данного агента
 var Mu sync.Mutex
 
-func (a *GRPCAgent) worker(id int) {
+func (a *GRPCAgent) Worker(id int) {
 	sem := make(chan struct{}, Workers)
 	interval := 1 * time.Second
 	ctx := context.Background()

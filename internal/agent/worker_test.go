@@ -42,12 +42,12 @@ func TestWorker(t *testing.T) {
 	defer conn.Close()
 
 	agent := &GRPCAgent{
-		client: proto.NewTaskServiceClient(conn),
-		conn:   conn,
+		Client: proto.NewTaskServiceClient(conn),
+		Conn:   conn,
 	}
 
 	Workers = 1
-	go agent.worker(1)
+	go agent.Worker(1)
 
 	select {
 	case req := <-testServer.received:
@@ -102,8 +102,8 @@ func TestWorkerErrorHandling(t *testing.T) {
 	defer conn.Close()
 
 	agent := &GRPCAgent{
-		client: proto.NewTaskServiceClient(conn),
-		conn:   conn,
+		Client: proto.NewTaskServiceClient(conn),
+		Conn:   conn,
 	}
 
 	logChan := make(chan string, 2)
@@ -111,7 +111,7 @@ func TestWorkerErrorHandling(t *testing.T) {
 	defer log.SetOutput(os.Stderr)
 
 	Workers = 1
-	go agent.worker(1)
+	go agent.Worker(1)
 
 	var logMsg string
 	for i := 0; i < 2; i++ {
@@ -157,8 +157,8 @@ func TestWorkerNilTaskHandling(t *testing.T) {
 	defer conn.Close()
 
 	agent := &GRPCAgent{
-		client: proto.NewTaskServiceClient(conn),
-		conn:   conn,
+		Client: proto.NewTaskServiceClient(conn),
+		Conn:   conn,
 	}
 
 	logChan := make(chan string, 1)
@@ -166,7 +166,7 @@ func TestWorkerNilTaskHandling(t *testing.T) {
 	defer log.SetOutput(os.Stderr)
 
 	Workers = 1
-	go agent.worker(1)
+	go agent.Worker(1)
 
 	select {
 	case msg := <-logChan:
@@ -178,14 +178,14 @@ func TestWorkerNilTaskHandling(t *testing.T) {
 
 func TestWorker_RetryOnFailure(t *testing.T) {
 	mockClient := &mockTaskServiceClient{receiveTaskError: true}
-	agent := &GRPCAgent{client: mockClient}
+	agent := &GRPCAgent{Client: mockClient}
 
 	logChan := make(chan string, 1)
 	log.SetOutput(&logWriter{logs: logChan})
 	defer log.SetOutput(os.Stderr)
 
 	Workers = 1
-	go agent.worker(1)
+	go agent.Worker(1)
 
 	select {
 	case msg := <-logChan:

@@ -130,8 +130,8 @@ func TestGRPCAgentIntegration(t *testing.T) {
 	defer conn.Close()
 
 	agent := &GRPCAgent{
-		client: proto.NewTaskServiceClient(conn),
-		conn:   conn,
+		Client: proto.NewTaskServiceClient(conn),
+		Conn:   conn,
 	}
 
 	t.Run("SendAndReceiveResult", func(t *testing.T) {
@@ -166,7 +166,7 @@ func (m *mockTaskServiceClient) ReceiveTask(ctx context.Context, req *proto.GetT
 
 func TestGetTask_Error(t *testing.T) {
 	agent := &GRPCAgent{
-		client: &mockTaskServiceClient{receiveTaskError: true},
+		Client: &mockTaskServiceClient{receiveTaskError: true},
 	}
 	_, err := agent.getTask(context.Background())
 	assert.Error(t, err, "Error expected but got nil")
@@ -178,7 +178,7 @@ func (m *mockTaskServiceClient) SubmitTaskResult(ctx context.Context, req *proto
 
 func TestSendResult_Error(t *testing.T) {
 	agent := &GRPCAgent{
-		client: &mockTaskServiceClient{},
+		Client: &mockTaskServiceClient{},
 	}
 	err := agent.sendResult(context.Background(), 1, 10, "")
 	assert.Error(t, err, "Error sending result expected")
@@ -256,7 +256,7 @@ func TestNewGRPCAgent_UsesDefaults(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, agent)
 
-	target := agent.conn.Target()
+	target := agent.Conn.Target()
 	assert.Equal(t, "localhost:50051", target)
 }
 
@@ -269,8 +269,8 @@ func TestSendResult_WithErrorMessage(t *testing.T) {
 	}), grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	agent := &GRPCAgent{
-		client: proto.NewTaskServiceClient(conn),
-		conn:   conn,
+		Client: proto.NewTaskServiceClient(conn),
+		Conn:   conn,
 	}
 
 	err := agent.sendResult(context.Background(), 1, 0, "division by zero")

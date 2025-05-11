@@ -61,3 +61,58 @@ func TestUpdateTaskResult(t *testing.T) {
 	assert.Equal(t, models.StatusResolved, expr.Status)
 	assert.Equal(t, 3.0, expr.Result)
 }
+
+func TestGetTask(t *testing.T) {
+	teardown := setupTestDB(t)
+	defer teardown()
+
+	exprID, _ := repo.Insert("3 + 4", 1)
+
+	task := &models.Task{
+		ExpressionID: exprID,
+		Arg1:         3,
+		Arg2:         4,
+		Operation:    "+",
+		Status:       models.StatusWait,
+	}
+	taskID, _ := repo.InsertTask(task)
+
+	dbTask, dbTaskID, err := repo.GetTask()
+	assert.NoError(t, err)
+	assert.Equal(t, taskID, dbTaskID)
+	assert.Equal(t, task.ExpressionID, dbTask.ExpressionID)
+	assert.Equal(t, task.Arg1, dbTask.Arg1)
+	assert.Equal(t, task.Arg2, dbTask.Arg2)
+	assert.Equal(t, task.Operation, dbTask.Operation)
+	assert.Equal(t, models.StatusWait, dbTask.Status)
+
+	dbTask, _ = repo.GetTaskByID(taskID)
+	assert.Equal(t, models.StatusInProcess, dbTask.Status)
+
+	dbTask, dbTaskID, err = repo.GetTask()
+	assert.NoError(t, err)
+	assert.Nil(t, dbTask)
+	assert.Zero(t, dbTaskID)
+}
+
+func TestGetTaskStatus(t *testing.T) {
+	teardown := setupTestDB(t)
+	defer teardown()
+
+	exprID, _ := repo.Insert("7 * 8", 1)
+
+	task := &models.Task{
+		ExpressionID: exprID,
+		Arg1:         7,
+		Arg2:         8,
+		Operation:    "*",
+		Status:       models.StatusResolved,
+		Result:       56.0,
+	}
+	taskID, _ := repo.InsertTask(task)
+
+	status, result, err := repo.GetTaskStatus(taskID)
+	assert.NoError(t, err)
+	assert.Equal(t, models.StatusResolved, status)
+	assert.Equal(t, 56.0, result)
+}

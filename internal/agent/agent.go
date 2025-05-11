@@ -18,8 +18,8 @@ var Workers int
 
 // GRPCAgent - gRPC-клиент для взаимодействия с оркестратором вычислений
 type GRPCAgent struct {
-	client proto.TaskServiceClient
-	conn   *grpc.ClientConn
+	Client proto.TaskServiceClient
+	Conn   *grpc.ClientConn
 }
 
 func newGRPCAgent() (*GRPCAgent, error) {
@@ -50,8 +50,8 @@ func newGRPCAgent() (*GRPCAgent, error) {
 	client := proto.NewTaskServiceClient(conn)
 
 	return &GRPCAgent{
-		client: client,
-		conn:   conn,
+		Client: client,
+		Conn:   conn,
 	}, nil
 }
 
@@ -70,7 +70,7 @@ func RunAgent() {
 
 	for i := 1; i <= Workers; i++ {
 		log.Printf("Starting worker %d", i)
-		go agent.worker(i)
+		go agent.Worker(i)
 	}
 
 	log.Printf("Starting %d workers", Workers)
@@ -79,7 +79,7 @@ func RunAgent() {
 }
 
 func (a *GRPCAgent) getTask(ctx context.Context) (*models.Task, error) {
-	resp, err := a.client.ReceiveTask(ctx, &proto.GetTaskRequest{})
+	resp, err := a.Client.ReceiveTask(ctx, &proto.GetTaskRequest{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get task: %w", err)
 	}
@@ -138,7 +138,7 @@ func (a *GRPCAgent) executeTask(ctx context.Context, task *models.Task) (float64
 }
 
 func (a *GRPCAgent) sendResult(ctx context.Context, taskID int, result float64, errorMessage string) error {
-	_, err := a.client.SubmitTaskResult(context.Background(), &proto.SubmitTaskResultRequest{
+	_, err := a.Client.SubmitTaskResult(context.Background(), &proto.SubmitTaskResultRequest{
 		TaskId:       int32(taskID),
 		Result:       result,
 		ErrorMessage: errorMessage,
