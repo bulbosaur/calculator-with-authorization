@@ -6,6 +6,10 @@
 
 [Web-calculator-golang](https://github.com/bulbosaur/web-calculator-golang) - предыдущая версия
 
+## Принцип работы
+
+![Архитектура](./img/map.png)
+
 ## GUI
 
 Если переменныем окружения не были изменены, графический интерфейс доступен по адресу ```http://localhost:8080```
@@ -43,7 +47,7 @@ go mod tidy
 
 Для запуска двух сервисов Вам потребуется 2 терминала. В **Visual Studio Code** удобно открыть сплит сочетанием клавиш ```Ctrl+Shift+5```.
 
-![Скрин из vscode](./img/image3.png)
+![Скрин из vscode](./img/split.png)
 
 - В первом необходимо ввести команду:
 
