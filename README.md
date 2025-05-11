@@ -6,6 +6,29 @@
 
 [Web-calculator-golang](https://github.com/bulbosaur/web-calculator-golang) - предыдущая версия
 
+
+- [Функционал](#функционал)
+- [Принцип работы](#принцип-работы)
+- [GUI](#gui)
+- [Зависимости](#зависимости)
+- [Установка](#установка)
+- [Переменные окружения](#переменные-окружения)
+- [API](#api)
+- [Middleware](#middleware)
+- [Веб страницы](#веб-страницы)
+- [База данных](#база-данных)
+- [Примеры работы](#примеры-работы)
+- [Тестирование](#тестирование)
+
+## Функционал 
+
+- Регистрация пользователя
+- Авторизация пользователя
+- Хранение истории выражений
+- Поддерживаются операции сложения, вычитания, умножения и деления, а также выражения в скобках
+- Выражение может вводиться как с пробелами между числом и операндом, так и без
+- Калькулятор принимает на вход положительные целые числа
+
 ## Принцип работы
 
 calculator-with-authorization предоставляет сервис калькулятора с JWT-аутентификацией. Пользователи могут регистрироваться, входить в систему, отправлять математические выражения для вычисления и просматривать историю своих вычислений. Обработка выражений выполняется асинхронно, результаты сохраняются в базу данных.
@@ -21,12 +44,6 @@ calculator-with-authorization предоставляет сервис кальк
 У пользователя есть возможность зарегистрироваться или войти в уже существующий аккаунт при помощи логина и пароля. После этого происходит переадресация на страницу самого калькулятора
 
 ![register](./img/register.gif)
-
-## Функционал 
-
-- Поддерживаются операции сложения, вычитания, умножения и деления, а также выражения в скобках
-- Выражение может вводиться как с пробелами между числом и операндом, так и без
-- Калькулятор принимает на вход положительные целые числа
 
 ## Зависимости
 
@@ -95,6 +112,67 @@ go run ./cmd/agent/main.go
 | ```worker.COMPUTING_POWER```           | Количество горутин, выполняющих вычисления          | 5                     |
 | ```jwt.secret_key```                   | Используется для создания цифровой подписи токена   | your_secret_key_here  |
 | ```jwt.token_duration```               | Время жизни токена                                  | 24                    |
+
+Задать новые переменные окружения можно:
+
+- В **.env** файле:
+
+```bash
+# ./config/.env
+server.ORC_HOST=example.com
+server.ORC_PORT=8000
+
+duration.TIME_ADDITION_MS=300
+duration.TIME_SUBTRACTION_MS=300
+duration.TIME_MULTIPLICATIONS_MS=300
+duration.TIME_DIVISIONS_MS=300
+
+DATABASE_PATH=C:/path/to/database.db
+
+worker.COMPUTING_POWER=1
+```
+
+- в **PowerShell** перед запуском программы:
+
+``` bash
+$env:SERVER_ORC_HOST = "example.com"
+$env:SERVER_ORC_PORT = "8000"
+
+$env:DURATION_TIME_ADDITION_MS       = "300"
+$env:DURATION_TIME_SUBTRACTION_MS    = "300"
+$env:DURATION_TIME_MULTIPLICATIONS_MS = "300"
+$env:DURATION_TIME_DIVISIONS_MS      = "300"
+
+$env:DATABASE_PATH = "C:/path/to/database.db"
+
+$env:WORKER_COMPUTING_POWER = "1"
+```
+
+- В терминале для **Linux/MacOS**:
+
+``` bash
+export SERVER_ORC_HOST=example.com
+export SERVER_ORC_PORT=8000
+export DURATION_TIME_ADDITION_MS=300
+export DURATION_TIME_SUBTRACTION_MS=300
+export DURATION_TIME_MULTIPLICATIONS_MS=300
+export DURATION_TIME_DIVISIONS_MS=300
+export DATABASE_PATH=/path/to/database.db
+export WORKER_COMPUTING_POWER=1
+```
+
+- Для **Windows** (CMD):
+
+``` bash
+   set SERVER_ORC_HOST=example.com
+   set SERVER_ORC_PORT=8000
+   set DURATION_TIME_ADDITION_MS=300
+   set DURATION_TIME_SUBTRACTION_MS=300
+   set DURATION_TIME_MULTIPLICATIONS_MS=300
+   set DURATION_TIME_DIVISIONS_MS=300
+   set DATABASE_PATH=C:\path\to\database.db
+   set WORKER_COMPUTING_POWER=1
+```
 
 ## API
 
@@ -257,6 +335,16 @@ I'm a teapot
 |```/calculator```      |```GET```| Интерфейс калькулятора (требуется авторизация)      |
 |```/coffee```          | любой   | Сердце всей программы                               |
 
+## База данных
+
+База данных состоит из трёх основных таблиц: ```users```, ```expressions``` и ```tasks```. Они связаны между собой через id юзера и id выражения и предназначены для хранения информации о пользователях, их математических выражениях и задачах вычисления.
+
+![Схема БД](./img/db.png)
+
+## Примеры работы
+
+Для отправки POST запросов удобнее всего использовать программу [Postman](https://www.postman.com/downloads/).
+Удобная коллекция с примерами запросов: https://documenter.getpostman.com/view/40465298/2sAYdinpZ5
 
 ## Тестирование
 
