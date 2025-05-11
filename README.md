@@ -384,3 +384,8 @@ go test -cover .\internal\repository\
 
 # ok        coverage: 80.5% of statements
 ```
+```bash
+go test -cover .\config\
+
+# ok        coverage: 100.0% of statements
+```
