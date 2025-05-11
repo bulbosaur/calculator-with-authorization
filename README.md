@@ -169,7 +169,58 @@ go run ./cmd/agent/main.go
 - URL : ```/api/v1/expressions```
 - Заголовки: ```Authorization: Bearer JWT_TOKEN```
 - Ответы:
+```bash
+    {
+        "id": 50,
+        "user_id": 2,
+        "expression": "2+2",
+        "status": "done",
+        "result": 4,
+        "error_message": ""
+    },
+    {
+        "id": 80,
+        "user_id": 2,
+        "expression": "45 /",
+        "status": "failed",
+        "result": 0,
+        "error_message": ""
+    },
+    {
+        "id": 81,
+        "user_id": 2,
+        "expression": "2+2+2+2+2+2+2+2+2+2",
+        "status": "done",
+        "result": 20,
+        "error_message": ""
+    }
+```
 
+#### 5. Получение результата выражения по ID
+- Метод : ```GET```
+- URL : ```/api/v1/expressions/{id}```
+- Заголовки: ```Authorization: Bearer JWT_TOKEN```
+- Ответы:
+```bash
+# /api/v1/expressions/3
+# 200 OK
+{
+    "expression": {
+        "id": 3,
+        "user_id": 3,
+        "expression": "3 - 3 - 3",
+        "status": "done",
+        "result": -3,
+        "error_message": ""
+        }
+}
+```
+Если попытаться запросить чужое выражение:
+```bash
+# /api/v1/expressions/70
+# 403 Forbidden
+
+```
 
 ## Тестирование
 
@@ -208,23 +259,4 @@ go test -cover .\internal\orchestrator\transport\http\middlewares\
 go test -cover .\internal\repository\
 
 # ok        coverage: 80.5% of statements
-```
-
-
-
-```bash
-        github.com/bulbosaur/calculator-with-authorization/cmd/agent            coverage: 0.0% of statements
-        github.com/bulbosaur/calculator-with-authorization/cmd/orchestrator             coverage: 0.0% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/config       (cached)        coverage: 100.0% of statements
-?       github.com/bulbosaur/calculator-with-authorization/internal/models      [no test files]
-        github.com/bulbosaur/calculator-with-authorization/internal/mock                coverage: 0.0% of statements
-        github.com/bulbosaur/calculator-with-authorization/proto                coverage: 0.0% of statements      
-        github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http         coverage: 0.0% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/agent       0.540s  coverage: 82.9% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/auth        (cached)        coverage: 90.0% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/service        (cached)        coverage: 88.6% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/grpc (cached)        coverage: 67.9% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/handlers        (cached)  coverage: 88.3% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/orchestrator/transport/http/middlewares     (cached)  coverage: 84.2% of statements
-ok      github.com/bulbosaur/calculator-with-authorization/internal/repository  (cached)        coverage: 76.1% of statements
 ```
