@@ -347,6 +347,11 @@ I'm a teapot
 Удобная коллекция с примерами запросов: https://documenter.getpostman.com/view/40465298/2sAYdinpZ5
 
 ## Тестирование
+тестовое покрытие всей программы можно посмотреть командой 
+```bash
+go test -cover ./...
+```
+Детализация тестов:
 
 ```bash
 go test -cover .\internal\agent\
