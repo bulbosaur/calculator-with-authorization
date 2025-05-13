@@ -6,6 +6,10 @@
 
 [Web-calculator-golang](https://github.com/bulbosaur/web-calculator-golang) - предыдущая версия
 
+комментарии в коде оформлены по правилам кодстайла golint
+
+автор проекта в тг – @bulbosaurus 
+
 
 - [Функционал](#функционал)
 - [Принцип работы](#принцип-работы)
